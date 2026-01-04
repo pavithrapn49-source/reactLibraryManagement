@@ -1,8 +1,8 @@
 import axios from "axios";
+const API = import.meta.env.VITE_API_URL;
 
-const API = axios.create({
-  baseURL: "http://localhost:5000/api",
-});
+axios.get(`${API}/books`);
+
 
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
