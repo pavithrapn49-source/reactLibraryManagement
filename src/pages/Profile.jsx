@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getMyBorrows, returnBook } from "../api/api";
+import "../styles/profile.css";
 
 const Profile = () => {
   const [borrows, setBorrows] = useState([]);
@@ -25,73 +26,70 @@ const Profile = () => {
     try {
       await returnBook(borrowId);
       alert("Book returned successfully");
-      fetchBorrows(); // refresh list
+      fetchBorrows();
     } catch (err) {
       alert("Return failed");
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (loading) return <p className="info-text">Loading...</p>;
+  if (error) return <p className="info-text" style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>My Borrowed Books</h2>
+    <div className="profile-page">
+      <h2 className="profile-title">My Borrowed Books</h2>
 
       {borrows.length === 0 ? (
-        <p>No borrow records found</p>
+        <p className="info-text">No borrow records found</p>
       ) : (
-        <table border="1" cellPadding="10" cellSpacing="0">
-          <thead>
-            <tr>
-              <th>Book</th>
-              <th>Author</th>
-              <th>Borrowed Date</th>
-              <th>Due Date</th>
-              <th>Status</th>
-              <th>Fine</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {borrows.map((borrow) => (
-              <tr key={borrow._id}>
-                <td>{borrow.book?.title}</td>
-                <td>{borrow.book?.author}</td>
-                <td>
-                  {new Date(borrow.createdAt).toLocaleDateString()}
-                </td>
-                <td>
-                  {borrow.dueDate
-                    ? new Date(borrow.dueDate).toLocaleDateString()
-                    : "-"}
-                </td>
-                <td>
-                  {borrow.returned ? (
-                    <span style={{ color: "green" }}>Returned</span>
-                  ) : (
-                    <span style={{ color: "orange" }}>Borrowed</span>
-                  )}
-                </td>
-                <td>₹{borrow.fine || 0}</td>
-                <td>
-                  {!borrow.returned && (
-                    <button
-                      onClick={() => handleReturn(borrow._id)}
-                      style={{
-                        padding: "5px 10px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Return
-                    </button>
-                  )}
-                </td>
+        <div className="table-container">
+          <table className="borrow-table">
+            <thead>
+              <tr>
+                <th>Book</th>
+                <th>Author</th>
+                <th>Borrowed Date</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Fine</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {borrows.map((borrow) => (
+                <tr key={borrow._id}>
+                  <td>{borrow.book?.title}</td>
+                  <td>{borrow.book?.author}</td>
+                  <td>{new Date(borrow.createdAt).toLocaleDateString()}</td>
+                  <td>
+                    {borrow.dueDate
+                      ? new Date(borrow.dueDate).toLocaleDateString()
+                      : "-"}
+                  </td>
+                  <td>
+                    {borrow.returned ? (
+                      <span className="status-returned">Returned</span>
+                    ) : (
+                      <span className="status-borrowed">Borrowed</span>
+                    )}
+                  </td>
+                  <td>₹{borrow.fine || 0}</td>
+                  <td>
+                    {!borrow.returned && (
+                      <button
+                        className="return-btn"
+                        onClick={() => handleReturn(borrow._id)}
+                      >
+                        Return
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

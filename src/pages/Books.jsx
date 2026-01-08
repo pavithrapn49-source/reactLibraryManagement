@@ -2,41 +2,60 @@ import "../styles/common.css";
 import "../styles/books.css";
 
 export default function Books() {
+  const books = [
+    {
+      title: "React Guide",
+      author: "Pavi",
+      price: 499,
+      image: "https://covers.openlibrary.org/b/id/10909258-L.jpg",
+    },
+    {
+      title: "Java Guide",
+      author: "Anandh",
+      price: 699,
+     image: "https://covers.openlibrary.org/b/id/10521270-L.jpg",
+
+    },
+
+    {
+      title: "Harry Potter",
+      author: "Shajan",
+      price: 999,
+      image: "https://images-na.ssl-images-amazon.com/images/I/81YOuOGFCJL.jpg",
+    },
+    {
+      title: "Geographical Tale",
+      author: "Ramu",
+      price: 980,
+      image: "https://images-na.ssl-images-amazon.com/images/I/71uAI28kJuL.jpg",
+    },
+    {
+      title: "Children's Tale",
+      author: "Saanvi",
+      price: 600,
+      image: "https://images-na.ssl-images-amazon.com/images/I/81eB+7+CkUL.jpg",
+    },
+  ];
+
   return (
     <div className="page">
-      <h1 className="title">Books</h1>
+      <h1 className="title">📚 Library Collection</h1>
+      <p className="subtitle">Discover books curated just for you</p>
 
       <div className="books-grid">
-        <div className="book-card">
-          <p className="book-title">React Guide</p>
-          <p className="book-author">Pavi</p>
-          <p className="book-price">₹499</p>
-        </div>
+        {books.map((book, index) => (
+          <div className="book-card" key={index}>
+            <div className="book-image">
+              <img src={book.image} alt={book.title} />
+            </div>
 
-        <div className="book-card">
-          <p className="book-title">Java Guide</p>
-          <p className="book-author">Anandh</p>
-          <p className="book-price">₹699</p>
-        </div>
-
-        <div className="book-card">
-          <p className="book-title">Harry Potter</p>
-          <p className="book-author">Shajan</p>
-          <p className="book-price">₹999</p>
-        </div>
-
-        <div className="book-card">
-          <p className="book-title">Geographical Tale</p>
-          <p className="book-author">Ramu</p>
-          <p className="book-price">₹980</p>
-        </div>
-
-        <div className="book-card">
-          <p className="book-title">Children's Tale</p>
-          <p className="book-author">Saanvi</p>
-          <p className="book-price">₹600</p>
-        </div>
-
+            <div className="book-info">
+              <h3>{book.title}</h3>
+              <p className="author">by {book.author}</p>
+              <span className="price">₹{book.price}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -1,0 +1,82 @@
+.profile-page {
+  padding: 40px;
+  background: linear-gradient(135deg, #b6679e, #c3cfe2);
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.profile-title {
+  font-size: 28px;
+  margin-bottom: 25px;
+  color: #eef58e;
+  text-align: center;
+}
+
+/* Table Wrapper */
+.table-container {
+  background: rgb(223, 151, 163);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  overflow-x: auto;
+}
+
+/* Table */
+.borrow-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.borrow-table th {
+  background: #2a5298;
+  color: white;
+  padding: 14px;
+  text-align: left;
+  font-weight: 500;
+}
+
+.borrow-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  color: #333;
+}
+
+.borrow-table tr:hover {
+  background-color: #f1f5ff;
+}
+
+/* Status */
+.status-returned {
+  color: green;
+  font-weight: 600;
+}
+
+.status-borrowed {
+  color: orange;
+  font-weight: 600;
+}
+
+/* Buttons */
+.return-btn {
+  background: linear-gradient(135deg, #36d1dc, #5b86e5);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.return-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* Empty & Loading */
+.info-text {
+  text-align: center;
+  font-size: 16px;
+  color: #444;
+  margin-top: 30px;
+}
