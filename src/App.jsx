@@ -4,12 +4,15 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Books from "./pages/Books";
 import Profile from "./pages/Profile";
+import Signup from "./pages/Signup";
+
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<Navigate to="/login" />} />
+       <Route path="/signup" element={<Signup />} />
 
       {/* Admin Dashboard */}
       <Route
