@@ -1,4 +1,3 @@
-import "../styles/common.css";
 import "../styles/books.css";
 
 export default function Books() {
@@ -13,13 +12,11 @@ export default function Books() {
       title: "Java Guide",
       author: "Anandh",
       price: 699,
-     image: "https://covers.openlibrary.org/b/id/10521270-L.jpg",
-
+      image: "https://covers.openlibrary.org/b/id/10521270-L.jpg",
     },
-
     {
       title: "Harry Potter",
-      author: "Shajan",
+      author: "J.K. Rowling",
       price: 999,
       image: "https://images-na.ssl-images-amazon.com/images/I/81YOuOGFCJL.jpg",
     },
@@ -38,21 +35,25 @@ export default function Books() {
   ];
 
   return (
-    <div className="page">
-      <h1 className="title">📚 Library Collection</h1>
-      <p className="subtitle">Discover books curated just for you</p>
+    <div className="books-page">
+      <h1 className="books-title">📚 Library Collection</h1>
+      <p className="books-subtitle">
+        Discover books curated just for you
+      </p>
 
       <div className="books-grid">
         {books.map((book, index) => (
           <div className="book-card" key={index}>
-            <div className="book-image">
-              <img src={book.image} alt={book.title} />
-            </div>
+            <img
+              src={book.image}
+              alt={book.title}
+              className="book-image"
+            />
 
-            <div className="book-info">
+            <div className="book-content">
               <h3>{book.title}</h3>
-              <p className="author">by {book.author}</p>
-              <span className="price">₹{book.price}</span>
+              <p className="author">✍ {book.author}</p>
+              <p className="price">₹{book.price}</p>
             </div>
           </div>
         ))}

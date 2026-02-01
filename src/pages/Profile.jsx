@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getMyBorrows, returnBook } from "../api/api";
+import { getMyBorrows, returnBook } from "../api/borrowApi";
+
 import "../styles/profile.css";
 
 const Profile = () => {

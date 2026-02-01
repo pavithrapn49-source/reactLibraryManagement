@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import API from "../api/api";
+import { registerUser } from "../api/authApi";
 
 import "../styles/common.css";
 import "../styles/auth.css";
@@ -16,20 +16,23 @@ export default function Signup() {
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
 
-    // 🔐 Password match validation
+    // Password validation
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
 
     try {
-      await API.post("/auth/register", {
+      await registerUser({
         email: formData.email,
         password: formData.password,
       });

@@ -1,20 +1,19 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import AdminDashboard from "./pages/AdminDashboard";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Books from "./pages/Books";
 import Profile from "./pages/Profile";
-import Signup from "./pages/Signup";
-
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
       <Route path="/" element={<Navigate to="/login" />} />
-       <Route path="/signup" element={<Signup />} />
 
-      {/* Admin Dashboard */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+
       <Route
         path="/admin"
         element={
@@ -24,7 +23,6 @@ function App() {
         }
       />
 
-      {/* Admin Sub Pages */}
       <Route
         path="/admin/books"
         element={
@@ -42,6 +40,8 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="*" element={<h2>Page Not Found</h2>} />
     </Routes>
   );
 }
