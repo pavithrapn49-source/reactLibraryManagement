@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://library-management-backend-dun8.onrender.com/api",
+  baseURL: "https://library-management-backend-0un8.onrender.com",
 });
 
 // Attach token automatically
