@@ -1,90 +1,82 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { registerUser } from "../api/authApi";
-
-import "../styles/common.css";
+import axios from "axios";
 import "../styles/auth.css";
-import "../styles/signup.css";
 
-export default function Signup() {
-  const navigate = useNavigate();
+const Signup = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSignup = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Password validation
-    if (formData.password !== formData.confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
+      alert("All fields are required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
     }
 
     try {
-      await registerUser({
-        email: formData.email,
-        password: formData.password,
-      });
+      const res = await axios.post(
+        "https://library-management-backend-0un8.onrender.com/api/auth/register",
+        { name, email, password }
+      );
 
-      alert("Signup successful! Please login.");
-      navigate("/login");
+      alert(res.data.message);
     } catch (err) {
       alert(err.response?.data?.message || "Signup failed");
     }
   };
 
   return (
-    <div className="auth-page">
-      <form className="auth-card" onSubmit={handleSignup}>
-        <h2>Create Account</h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h2 className="auth-title">Create Account</h2>
+        <p className="auth-subtitle">Sign up to continue</p>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-        />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        <button type="submit">Sign Up</button>
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
 
-        <p style={{ marginTop: "15px", textAlign: "center" }}>
-          Already have an account?{" "}
-          <Link to="/login" style={{ color: "#2a5298", fontWeight: "600" }}>
-            Login
-          </Link>
-        </p>
-      </form>
+          <button type="submit">Sign Up</button>
+        </form>
+
+        <div className="auth-footer">
+          Already have an account? <a href="/login">Login</a>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default Signup;
