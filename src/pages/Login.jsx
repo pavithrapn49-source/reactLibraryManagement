@@ -9,6 +9,15 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  const getRoleFromToken = (token) => {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload?.role;
+    } catch {
+      return null;
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -18,8 +27,17 @@ const Login = () => {
         { email, password }
       );
 
-      localStorage.setItem("token", res.data.token);
-      navigate("/admin");
+      const token = res.data.token;
+      const role =
+        res.data.user?.role ||
+        res.data.role ||
+        getRoleFromToken(token) ||
+        "librarian";
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+
+      navigate(role === "admin" ? "/admin" : "/librarian");
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     }

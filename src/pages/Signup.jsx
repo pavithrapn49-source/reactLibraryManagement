@@ -7,6 +7,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("librarian");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +25,7 @@ const Signup = () => {
     try {
       const res = await axios.post(
         "https://library-management-backend-0un8.onrender.com/api/auth/register",
-        { name, email, password }
+        { name, email, password, role }
       );
 
       alert(res.data.message);
@@ -67,6 +68,11 @@ const Signup = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
+
+          <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="admin">Admin</option>
+            <option value="librarian">Librarian</option>
+          </select>
 
           <button type="submit">Sign Up</button>
         </form>

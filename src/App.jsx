@@ -17,8 +17,17 @@ function App() {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute>
-            <AdminDashboard />
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminDashboard role="admin" />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/librarian"
+        element={
+          <ProtectedRoute allowedRoles={["librarian"]}>
+            <AdminDashboard role="librarian" />
           </ProtectedRoute>
         }
       />
@@ -26,7 +35,16 @@ function App() {
       <Route
         path="/admin/books"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Books />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/librarian/books"
+        element={
+          <ProtectedRoute allowedRoles={["librarian"]}>
             <Books />
           </ProtectedRoute>
         }
@@ -35,7 +53,16 @@ function App() {
       <Route
         path="/admin/profile"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/librarian/profile"
+        element={
+          <ProtectedRoute allowedRoles={["librarian"]}>
             <Profile />
           </ProtectedRoute>
         }

@@ -3,8 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import "../styles/common.css";
 import "../styles/adminDashboard.css";
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ role: roleFromRoute }) {
   const navigate = useNavigate();
+  const role = localStorage.getItem("role") || roleFromRoute || "admin";
+  const isAdmin = role === "admin";
+  const routePrefix = isAdmin ? "/admin" : "/librarian";
 
   const stats = [
     { name: "Books", value: 120 },
@@ -21,6 +24,7 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
     navigate("/login");
   };
 
@@ -28,18 +32,18 @@ export default function AdminDashboard() {
     <div className="dashboard-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <h2>Library Admin</h2>
+        <h2>{isAdmin ? "Library Admin" : "Library Librarian"}</h2>
         <ul>
-          <li><Link to="/admin">Dashboard</Link></li>
-          <li><Link to="/admin/books">Books</Link></li>
-          <li><Link to="/admin/profile">Profile</Link></li>
+          <li><Link to={routePrefix}>Dashboard</Link></li>
+          <li><Link to={`${routePrefix}/books`}>Books</Link></li>
+          <li><Link to={`${routePrefix}/profile`}>Profile</Link></li>
         </ul>
       </aside>
 
       {/* Main Content */}
       <main className="dashboard-main">
         <div className="header">
-          <h1>Admin Dashboard</h1>
+          <h1>{isAdmin ? "Admin Dashboard" : "Librarian Dashboard"}</h1>
           <button className="logout-btn" onClick={handleLogout}>Logout</button>
         </div>
 <div className="stats">

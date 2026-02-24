@@ -76,7 +76,8 @@
 }
 
 /* Inputs */
-.auth-card input {
+.auth-card input,
+.auth-card select {
   width: 100%;
   padding: 12px;
   margin-bottom: 15px;
@@ -86,7 +87,8 @@
   font-size: 14px;
 }
 
-.auth-card input:focus {
+.auth-card input:focus,
+.auth-card select:focus {
   border-color: #4f46e5;
 }
 
