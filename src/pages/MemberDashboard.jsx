@@ -50,38 +50,39 @@ const MemberDashboard = () => {
   };
 
   // ================= BORROW BOOK =================
-  const borrowBook = async (bookId) => {
-    try {
-      await axios.post(
-        `${API}/api/books/${bookId}/borrow`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+ 
+const borrowBook = async (bookId) => {
+  try {
+    await axios.post(
+      `${API}/api/borrow/${bookId}`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      alert("Book borrowed successfully!");
-      fetchBooks();
-      fetchMyBorrows();
-    } catch (err) {
-      alert(err.response?.data?.message || "Error borrowing book");
-    }
-  };
-
+    alert("Book borrowed successfully!");
+    fetchBooks();
+    fetchMyBorrows();
+  } catch (err) {
+    alert(err.response?.data?.message || "Error borrowing book");
+  }
+};
   // ================= RETURN BOOK =================
-  const returnBook = async (borrowId) => {
-    try {
-      await axios.put(
-        `${API}/api/borrow/return/${borrowId}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
 
-      alert("Book returned successfully!");
-      fetchBooks();
-      fetchMyBorrows();
-    } catch (err) {
-      alert(err.response?.data?.message || "Error returning book");
-    }
-  };
+const returnBook = async (borrowId) => {
+  try {
+    await axios.put(
+      `${API}/api/borrow/return/${borrowId}`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    alert("Book returned successfully!");
+    fetchBooks();
+    fetchMyBorrows();
+  } catch (err) {
+    alert(err.response?.data?.message || "Error returning book");
+  }
+};
 
   // ================= LOGOUT =================
   const handleLogout = () => {
