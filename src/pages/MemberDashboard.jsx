@@ -4,7 +4,7 @@ import "../styles/memberDashboard.css";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const API = "https://library-management-backend-0un8.onrender.com/api/books";
+const API = "https://library-management-backend-0un8.onrender.com";
 
 const bookImages = {
   "React Guide": "/react guide.jpg",
@@ -18,19 +18,16 @@ const bookImages = {
 
 const MemberDashboard = () => {
   const [books, setBooks] = useState([]);
+  const [myBorrows, setMyBorrows] = useState([]);
+
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  const token = localStorage.getItem("token");
 
-  // ✅ Fetch Books
+  // ================= FETCH ALL BOOKS =================
   const fetchBooks = async () => {
     try {
-      const token = localStorage.getItem("token");
-
       const res = await axios.get(`${API}/api/books`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -42,11 +39,22 @@ const MemberDashboard = () => {
     }
   };
 
-  // ✅ Borrow Book
+  // ================= FETCH MY BORROWS =================
+  const fetchMyBorrows = async () => {
+    try {
+      const res = await axios.get(`${API}/api/borrow/my-borrows`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setMyBorrows(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ================= BORROW BOOK =================
   const borrowBook = async (id) => {
     try {
-      const token = localStorage.getItem("token");
-
       await axios.post(
         `${API}/api/books/${id}/borrow`,
         {},
@@ -57,38 +65,45 @@ const MemberDashboard = () => {
 
       alert("Book borrowed successfully!");
       fetchBooks();
+      fetchMyBorrows();
     } catch (err) {
       alert(err.response?.data?.message || "Error borrowing book");
     }
   };
 
-  // ✅ Return Book
-  
+  // ================= RETURN BOOK =================
+  const returnBook = async (id) => {
+    try {
+      await axios.put(
+        `${API}/api/books/${id}/return`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-const returnBook = async (id) => {
-  try {
-    const token = localStorage.getItem("token");
+      alert("Book returned successfully!");
+      fetchBooks();
+      fetchMyBorrows();
+    } catch (err) {
+      alert(err.response?.data?.message || "Error returning book");
+    }
+  };
 
-    await axios.put(
-      `${API}/api/books/${id}/return`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+  // ================= LOGOUT =================
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
-    alert("Book returned successfully!");
+  useEffect(() => {
     fetchBooks();
-
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.message || "Error returning book");
-  }
-};
+    fetchMyBorrows();
+  }, []);
 
   return (
     <div className="dashboard-container">
-      {/* Header */}
+      {/* HEADER */}
       <div className="dashboard-header">
         <h2>Member Dashboard</h2>
         <button className="logout-btn" onClick={handleLogout}>
@@ -96,7 +111,8 @@ const returnBook = async (id) => {
         </button>
       </div>
 
-      {/* Book Grid */}
+      {/* ================= AVAILABLE BOOKS ================= */}
+      <h3>Available Books</h3>
       <div className="book-grid">
         {books.map((book) => (
           <div key={book._id} className="book-card">
@@ -105,40 +121,48 @@ const returnBook = async (id) => {
               alt={book.title}
               className="book-image"
             />
-            <h3>{book.title}</h3>
+            <h4>{book.title}</h4>
             <p>{book.author}</p>
+            <p>Status: {book.borrowed ? "Borrowed" : "Available"}</p>
 
-            {/* 🔥 Borrow / Return Logic */}
-            {book.borrowed ? (
-              <>
-                <button className="borrowed-btn" disabled>
-                  Borrowed
-                </button>
-
-                <button
-                  className="return-btn"
-                  onClick={() => returnBook(book._id)}
-                >
-                  Return
-                </button>
-
-                <p className="due-text">
-                  Due:{" "}
-                  {book.dueDate
-                    ? new Date(book.dueDate).toLocaleDateString()
-                    : "N/A"}
-                </p>
-              </>
-            ) : (
-              <button
-                className="borrow-btn"
-                onClick={() => borrowBook(book._id)}
-              >
-                Borrow
-              </button>
-            )}
+            <button
+              className={book.borrowed ? "borrowed-btn" : "borrow-btn"}
+              disabled={book.borrowed}
+              onClick={() => borrowBook(book._id)}
+            >
+              {book.borrowed ? "Borrowed" : "Borrow"}
+            </button>
           </div>
         ))}
+      </div>
+
+      {/* ================= MY BORROWED BOOKS ================= */}
+      <h3 style={{ marginTop: "40px" }}>My Borrowed Books</h3>
+      <div className="book-grid">
+        {myBorrows.length === 0 && <p>No borrowed books</p>}
+
+        {myBorrows.map((borrow) => {
+          const dueDate = borrow.dueDate
+            ? new Date(borrow.dueDate).toLocaleDateString()
+            : "N/A";
+
+          return (
+            <div key={borrow._id} className="book-card">
+              <h4>{borrow.book?.title}</h4>
+              <p>{borrow.book?.author}</p>
+              <p>
+                Due Date: <strong>{dueDate}</strong>
+              </p>
+
+              <button
+                className="return-btn"
+                onClick={() => returnBook(borrow.book._id)}
+              >
+                Return
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
