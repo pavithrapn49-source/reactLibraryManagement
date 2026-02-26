@@ -1,55 +1,62 @@
-.auth-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* login.css - used for Login & Register pages */
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f39d9d;
+  margin: 0;
+  padding: 0;
 }
 
-.auth-card {
-  background: white;
-  width: 380px;
-  padding: 32px;
-  border-radius: 14px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+.login-container {
+  max-width: 400px;
+  margin: 80px auto;
+  background-color: #7ee6b5;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
 }
 
-.auth-card h2 {
+.login-container h2 {
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   color: #333;
 }
 
-.auth-card input {
-  width: 100%;
-  padding: 12px;
+.login-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-container input,
+.login-container select {
   margin-bottom: 15px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 15px;
-}
-
-.auth-card input:focus {
-  border-color: #667eea;
-  outline: none;
-}
-
-.auth-card button {
-  width: 100%;
   padding: 12px;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   font-size: 16px;
+}
+
+.login-container button {
+  padding: 12px;
+  background-color: #4f46e5;
+  color: #fff;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  transition: 0.3s;
 }
 
-.auth-card button:hover {
-  background: #5a67d8;
+.login-container button:hover {
+  background-color: #3730a3;
 }
 
-.auth-card p {
+.login-container p {
   text-align: center;
-  margin-top: 15px;
+  font-size: 14px;
+  color: #555;
+}
+
+.login-container p button {
+  font-size: 14px;
 }

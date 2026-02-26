@@ -1,38 +1,42 @@
 import { createContext, useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user"))
-  );
-  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
-  const login = (email, password) => {
-    if (email === "admin@gmail.com" && password === "admin123") {
-      const u = { role: "admin" };
-      setUser(u);
-      localStorage.setItem("user", JSON.stringify(u));
-      navigate("/admin");
-    } else if (email === "user@gmail.com" && password === "user123") {
-      const u = { role: "user" };
-      setUser(u);
-      localStorage.setItem("user", JSON.stringify(u));
-      navigate("/books");
-    } else {
-      alert("Invalid credentials");
-    }
+  const login = async (email, password) => {
+    const res = await axios.post(
+      "http://localhost:5000/api/auth/login",
+      { email, password }
+    );
+
+    // ✅ SAVE TOKEN
+    localStorage.setItem("token", res.data.token);
+
+    // ✅ SAVE ONLY USER OBJECT
+    setUser(res.data.user);
+
+    return res.data.user;
+  };
+
+  const register = async (name, email, password, role) => {
+    const res = await axios.post(
+      "http://localhost:5000/api/auth/register",
+      { name, email, password, role }
+    );
+
+    return res.data;
   };
 
   const logout = () => {
+    localStorage.removeItem("token");
     setUser(null);
-    localStorage.removeItem("user");
-    navigate("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

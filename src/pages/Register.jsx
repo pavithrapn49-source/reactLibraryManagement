@@ -1,54 +1,93 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import "../styles/login.css";
 
-export default function Register() {
+const Register = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [role, setRole] = useState("member");
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Mock register (replace with backend later)
-    const newUser = { email, role: "user" };
-    localStorage.setItem("user", JSON.stringify(newUser));
+    if (!name || !email || !password) {
+      alert("All fields are required");
+      return;
+    }
 
-    alert("Registration successful!");
-    navigate("/login");
+    setLoading(true);
+    try {
+      await register(name, email, password, role);
+      alert("Registered successfully!");
+      navigate("/login");
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <form className="bg-white p-6 shadow rounded w-80">
-        <h2 className="text-xl font-bold mb-4 text-center">Register</h2>
-
+    <div className="login-container">
+      <h2>Register</h2>
+      <form onSubmit={handleSubmit} autoComplete="off">
+        <input
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          autoComplete="off"
+        />
         <input
           type="email"
           placeholder="Email"
-          className="border p-2 w-full mb-3"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
+          autoComplete="off"
         />
-
         <input
           type="password"
           placeholder="Password"
-          className="border p-2 w-full mb-3"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete="new-password"
         />
-
-        <button className="bg-green-600 text-white w-full py-2 rounded">
-          Register
+        <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <option value="member">Member</option>
+          <option value="librarian">Librarian</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button type="submit" disabled={loading}>
+          {loading ? "Registering..." : "Register"}
         </button>
-
-        <p className="text-sm mt-3 text-center">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-600">
-            Login
-          </Link>
-        </p>
       </form>
+      <p style={{ marginTop: "1rem" }}>
+        Already have an account?{" "}
+        <button
+          style={{
+            background: "none",
+            border: "none",
+            color: "blue",
+            cursor: "pointer",
+            textDecoration: "underline",
+            padding: 0,
+            font: "inherit"
+          }}
+          onClick={() => navigate("/login")}
+        >
+          Login here
+        </button>
+      </p>
     </div>
   );
-}
+};
+
+export default Register;

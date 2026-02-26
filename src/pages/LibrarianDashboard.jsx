@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import "../styles/adminDashboard.css";
+import "../styles/librarianDashboard.css";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -14,9 +14,10 @@ const bookImages = {
   "Little Ones": "/little ones.jpg",
 };
 
-const AdminDashboard = () => {
+const LibrarianDashboard = () => {
   const [books, setBooks] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
 
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -24,9 +25,9 @@ const AdminDashboard = () => {
   const token = localStorage.getItem("token");
 
   const handleLogout = () => {
-    logout();              // clears token from context
-    localStorage.removeItem("token"); // extra safety
-    navigate("/login");    // redirect to login
+    logout();
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   const fetchBooks = async () => {
@@ -36,18 +37,17 @@ const AdminDashboard = () => {
     setBooks(res.data);
   };
 
- const fetchUsers = async () => {
-  try {
-    const res = await axios.get(
-      "http://localhost:5000/api/auth/users",
+  const addBook = async (e) => {
+    e.preventDefault();
+    await axios.post(
+      "http://localhost:5000/api/books",
+      { title, author },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    console.log("Users:", res.data); // 👈 Add this
-    setUsers(res.data);
-  } catch (error) {
-    console.error("Error fetching users:", error.response?.data || error.message);
-  }
-};
+    setTitle("");
+    setAuthor("");
+    fetchBooks();
+  };
 
   const deleteBook = async (id) => {
     await axios.delete(`http://localhost:5000/api/books/${id}`, {
@@ -56,21 +56,13 @@ const AdminDashboard = () => {
     fetchBooks();
   };
 
-  const deleteUser = async (id) => {
-    await axios.delete(`http://localhost:5000/api/auth/users/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    fetchUsers();
-  };
-
   useEffect(() => {
     fetchBooks();
-    fetchUsers();
   }, []);
 
   return (
     <div className="dashboard-container">
-      
+
       {/* ✅ Logout Button */}
       <div style={{ textAlign: "right" }}>
         <button className="logout-btn" onClick={handleLogout}>
@@ -78,9 +70,24 @@ const AdminDashboard = () => {
         </button>
       </div>
 
-      <h2>👑 Admin Dashboard</h2>
+      <h2>📚 Librarian Dashboard</h2>
 
-      <h3>All Books</h3>
+      <form onSubmit={addBook} className="add-book-form">
+        <input
+          placeholder="Book Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+        <input
+          placeholder="Author"
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+          required
+        />
+        <button type="submit">Add Book</button>
+      </form>
+
       <div className="book-grid">
         {books.map((b) => (
           <div key={b._id} className="book-card">
@@ -96,20 +103,8 @@ const AdminDashboard = () => {
           </div>
         ))}
       </div>
-
-      <h3 style={{ marginTop: "40px" }}>All Users</h3>
-      <div className="user-grid">
-        {users.map((u) => (
-          <div key={u._id} className="user-card">
-            <h4>{u.name}</h4>
-            <p>{u.email}</p>
-            <p>Role: {u.role}</p>
-            <button onClick={() => deleteUser(u._id)}>Delete User</button>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };
 
-export default AdminDashboard;
+export default LibrarianDashboard;

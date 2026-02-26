@@ -1,58 +1,88 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/login.css";
-import "../styles/auth.css";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = async (e) => {
+  const [email, setEmail] = useState("");       // starts empty
+  const [password, setPassword] = useState(""); // starts empty
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    try {
-      const res = await axios.post(
-        "https://library-management-backend-0un8.onrender.com/api/auth/login",
-        { email, password }
-      );
-
-      localStorage.setItem("token", res.data.token);
-      navigate("/admin");
-    } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+    if (!email || !password) {
+      alert("Please enter both email and password");
+      return;
     }
+
+    setLoading(true);
+    try {
+      const user = await login(email, password);
+
+      // Redirect based on role
+      if (user.role === "admin") navigate("/admin");
+      else if (user.role === "librarian") navigate("/librarian");
+      else navigate("/member");
+
+    } 
+    
+    
+    catch (error) {
+      alert(error.response?.data?.message || error.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+
   };
 
   return (
     <div className="login-container">
-      <form className="login-card" onSubmit={handleLogin}>
-        <h2>📚 Library Login</h2>
-        <p>Manage your books easily</p>
+      <h2>Login</h2>
 
+      <form onSubmit={handleSubmit} autoComplete="off">
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          autoComplete="off"
         />
 
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Enter your password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          autoComplete="new-password"
         />
 
-        <button type="submit">Login</button>
-
-        <span>
-          Don’t have an account? <Link to="/signup">Signup</Link>
-        </span>
+        <button type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
       </form>
+
+      <p style={{ marginTop: "1rem" }}>
+        Don't have an account?{" "}
+        <button
+          style={{
+            background: "none",
+            border: "none",
+            color: "blue",
+            cursor: "pointer",
+            textDecoration: "underline",
+            padding: 0,
+            font: "inherit"
+          }}
+          onClick={() => navigate("/register")}
+        >
+          Register here
+        </button>
+      </p>
     </div>
   );
 };

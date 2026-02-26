@@ -1,48 +1,23 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import AdminDashboard from "./pages/AdminDashboard";
-import Books from "./pages/Books";
-import Profile from "./pages/Profile";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import MemberDashboard from "./pages/MemberDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import LibrarianDashboard from "./pages/LibrarianDashboard";
+ 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/login" />} />
-
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/books"
-        element={
-          <ProtectedRoute>
-            <Books />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route path="*" element={<h2>Page Not Found</h2>} />
-    </Routes>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/member" element={<MemberDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/librarian" element={<LibrarianDashboard />} />
+      </Routes>
+    </Router>
   );
 }
 
