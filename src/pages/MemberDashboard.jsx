@@ -28,7 +28,7 @@ const MemberDashboard = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await axios.get("https://library-management-backend-0un8.onrender.com", {
+      const res = await axios.get("https://library-management-backend-0un8.onrender.com/api/books", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
