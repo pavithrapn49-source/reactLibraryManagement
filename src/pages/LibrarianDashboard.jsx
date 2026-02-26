@@ -31,7 +31,7 @@ const LibrarianDashboard = () => {
   };
 
   const fetchBooks = async () => {
-    const res = await axios.get("http://localhost:5000/api/books", {
+    const res = await axios.get("https://library-management-backend-0un8.onrender.com/api/books", {
       headers: { Authorization: `Bearer ${token}` },
     });
     setBooks(res.data);
@@ -40,7 +40,7 @@ const LibrarianDashboard = () => {
   const addBook = async (e) => {
     e.preventDefault();
     await axios.post(
-      "http://localhost:5000/api/books",
+      "https://library-management-backend-0un8.onrender.com/api/books",
       { title, author },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -50,7 +50,7 @@ const LibrarianDashboard = () => {
   };
 
   const deleteBook = async (id) => {
-    await axios.delete(`http://localhost:5000/api/books/${id}`, {
+    await axios.delete(`https://library-management-backend-0un8.onrender.com/api/books/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     fetchBooks();

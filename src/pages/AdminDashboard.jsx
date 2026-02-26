@@ -30,7 +30,7 @@ const AdminDashboard = () => {
   };
 
   const fetchBooks = async () => {
-    const res = await axios.get("http://localhost:5000/api/books", {
+    const res = await axios.get("https://library-management-backend-0un8.onrender.com/api/books", {
       headers: { Authorization: `Bearer ${token}` },
     });
     setBooks(res.data);
@@ -39,7 +39,7 @@ const AdminDashboard = () => {
  const fetchUsers = async () => {
   try {
     const res = await axios.get(
-      "http://localhost:5000/api/auth/users",
+      "https://library-management-backend-0un8.onrender.com/api/auth/users",
       { headers: { Authorization: `Bearer ${token}` } }
     );
     console.log("Users:", res.data); // 👈 Add this
@@ -50,14 +50,14 @@ const AdminDashboard = () => {
 };
 
   const deleteBook = async (id) => {
-    await axios.delete(`http://localhost:5000/api/books/${id}`, {
+    await axios.delete(`https://library-management-backend-0un8.onrender.com/api/books/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     fetchBooks();
   };
 
   const deleteUser = async (id) => {
-    await axios.delete(`http://localhost:5000/api/auth/users/${id}`, {
+    await axios.delete(`https://library-management-backend-0un8.onrender.com/api/auth/users/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     fetchUsers();
