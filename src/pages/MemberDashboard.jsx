@@ -25,16 +25,14 @@ const MemberDashboard = () => {
 
   const token = localStorage.getItem("token");
 
-  // ================= FETCH ALL BOOKS =================
+  // ================= FETCH BOOKS =================
   const fetchBooks = async () => {
     try {
       const res = await axios.get(`${API}/api/books`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setBooks(res.data);
     } catch (err) {
-      console.error(err);
       alert("Error fetching books");
     }
   };
@@ -45,7 +43,6 @@ const MemberDashboard = () => {
       const res = await axios.get(`${API}/api/borrow/my-borrows`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setMyBorrows(res.data);
     } catch (err) {
       console.error(err);
@@ -53,14 +50,12 @@ const MemberDashboard = () => {
   };
 
   // ================= BORROW BOOK =================
-  const borrowBook = async (id) => {
+  const borrowBook = async (bookId) => {
     try {
       await axios.post(
-        `${API}/api/books/${id}/borrow`,
+        `${API}/api/books/${bookId}/borrow`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       alert("Book borrowed successfully!");
@@ -72,14 +67,12 @@ const MemberDashboard = () => {
   };
 
   // ================= RETURN BOOK =================
-  const returnBook = async (id) => {
+  const returnBook = async (borrowId) => {
     try {
       await axios.put(
-        `${API}/api/books/${id}/return`,
+        `${API}/api/borrow/return/${borrowId}`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       alert("Book returned successfully!");
@@ -125,13 +118,14 @@ const MemberDashboard = () => {
             <p>{book.author}</p>
             <p>Status: {book.borrowed ? "Borrowed" : "Available"}</p>
 
-            <button
-              className={book.borrowed ? "borrowed-btn" : "borrow-btn"}
-              disabled={book.borrowed}
-              onClick={() => borrowBook(book._id)}
-            >
-              {book.borrowed ? "Borrowed" : "Borrow"}
-            </button>
+            {!book.borrowed && (
+              <button
+                className="borrow-btn"
+                onClick={() => borrowBook(book._id)}
+              >
+                Borrow
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -156,7 +150,7 @@ const MemberDashboard = () => {
 
               <button
                 className="return-btn"
-                onClick={() => returnBook(borrow.book._id)}
+                onClick={() => returnBook(borrow._id)}  
               >
                 Return
               </button>
