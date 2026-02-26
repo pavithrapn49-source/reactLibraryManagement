@@ -4,7 +4,7 @@ import "../styles/memberDashboard.css";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const API = "https://library-management-backend-0un8.onrender.com";
+const API = "https://library-management-backend-0un8.onrender.com/api/books";
 
 const bookImages = {
   "React Guide": "/react guide.jpg",
