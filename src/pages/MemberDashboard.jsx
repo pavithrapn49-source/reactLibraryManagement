@@ -63,28 +63,28 @@ const MemberDashboard = () => {
   };
 
   // ✅ Return Book
-  const returnBook = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
+  
 
-      await axios.put(
-        `${API}/api/books/${id}/return`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+const returnBook = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
 
-      alert("Book returned successfully!");
-      fetchBooks();
-    } catch (err) {
-      alert(err.response?.data?.message || "Error returning book");
-    }
-  };
+    await axios.put(
+      `${API}/api/books/${id}/return`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
-  useEffect(() => {
+    alert("Book returned successfully!");
     fetchBooks();
-  }, []);
+
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.message || "Error returning book");
+  }
+};
 
   return (
     <div className="dashboard-container">
