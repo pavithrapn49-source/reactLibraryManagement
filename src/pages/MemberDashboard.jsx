@@ -50,25 +50,40 @@ const MemberDashboard = () => {
   };
 
   // ================= BORROW BOOK =================
- 
-const borrowBook = async (bookId) => {
-  try {
-    await axios.post(
-      `${API}/api/borrow/${bookId}`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+  const borrowBook = async (bookId) => {
+    try {
+      await axios.post(
+        `${API}/api/borrow/${bookId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    alert("Book borrowed successfully!");
-    fetchBooks();
-    fetchMyBorrows();
-  } catch (err) {
-    alert(err.response?.data?.message || "Error borrowing book");
-  }
-};
+      alert("Book borrowed successfully!");
+      fetchBooks();
+      fetchMyBorrows();
+    } catch (err) {
+      alert(err.response?.data?.message || "Error borrowing book");
+    }
+  };
+
+  // ================= RESERVE BOOK =================
+  const reserveBook = async (id) => {
+    try {
+      await axios.post(
+        `${API}/api/books/reserve/${id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert("Book reserved successfully!");
+      fetchBooks();
+    } catch (error) {
+      alert(error.response?.data?.message || "Reservation failed");
+    }
+  };
+
   // ================= RETURN BOOK =================
-
-const returnBook = async (borrowId) => {
+  const returnBook = async (borrowId) => {
   try {
     await axios.put(
       `${API}/api/borrow/return/${borrowId}`,
@@ -83,7 +98,6 @@ const returnBook = async (borrowId) => {
     alert(err.response?.data?.message || "Error returning book");
   }
 };
-
   // ================= LOGOUT =================
   const handleLogout = () => {
     logout();
@@ -97,6 +111,7 @@ const returnBook = async (borrowId) => {
 
   return (
     <div className="dashboard-container">
+
       {/* HEADER */}
       <div className="dashboard-header">
         <h2>Member Dashboard</h2>
@@ -107,19 +122,29 @@ const returnBook = async (borrowId) => {
 
       {/* ================= AVAILABLE BOOKS ================= */}
       <h3>Available Books</h3>
+
       <div className="book-grid">
         {books.map((book) => (
           <div key={book._id} className="book-card">
+
             <img
               src={bookImages[book.title] || "/default.jpg"}
               alt={book.title}
               className="book-image"
             />
+
             <h4>{book.title}</h4>
             <p>{book.author}</p>
-            <p>Status: {book.borrowed ? "Borrowed" : "Available"}</p>
 
-            {!book.borrowed && (
+            <p>
+              Status:{" "}
+              <strong>
+                {book.availabilityStatus ? "Available" : "Borrowed"}
+              </strong>
+            </p>
+
+            {/* Borrow Button */}
+            {book.availabilityStatus && (
               <button
                 className="borrow-btn"
                 onClick={() => borrowBook(book._id)}
@@ -127,38 +152,59 @@ const returnBook = async (borrowId) => {
                 Borrow
               </button>
             )}
+
+            {/* Reserve Button */}
+            {!book.availabilityStatus && (
+              <button
+                className="reserve-btn"
+                onClick={() => reserveBook(book._id)}
+              >
+                Reserve
+              </button>
+            )}
+
           </div>
         ))}
       </div>
 
       {/* ================= MY BORROWED BOOKS ================= */}
+
       <h3 style={{ marginTop: "40px" }}>My Borrowed Books</h3>
+
       <div className="book-grid">
+
         {myBorrows.length === 0 && <p>No borrowed books</p>}
 
-        {myBorrows.map((borrow) => {
-          const dueDate = borrow.dueDate
-            ? new Date(borrow.dueDate).toLocaleDateString()
-            : "N/A";
+     {myBorrows
+  .filter((borrow) => borrow.book) 
+  .map((borrow) => {
 
-          return (
-            <div key={borrow._id} className="book-card">
-              <h4>{borrow.book?.title}</h4>
-              <p>{borrow.book?.author}</p>
-              <p>
-                Due Date: <strong>{dueDate}</strong>
-              </p>
+    const dueDate = borrow.dueDate
+      ? new Date(borrow.dueDate).toLocaleDateString()
+      : "N/A";
 
-              <button
-                className="return-btn"
-                onClick={() => returnBook(borrow._id)}  
-              >
-                Return
-              </button>
-            </div>
-          );
-        })}
+    return (
+      <div key={borrow._id} className="book-card">
+
+        <h4>{borrow.book.title}</h4>
+        <p>{borrow.book.author}</p>
+
+        <p>
+          Due Date: <strong>{dueDate}</strong>
+        </p>
+
+        <button
+          className="return-btn"
+          onClick={() => returnBook(borrow._id)}
+        >
+          Return
+        </button>
+
       </div>
+    );
+})}
+      </div>
+
     </div>
   );
 };
