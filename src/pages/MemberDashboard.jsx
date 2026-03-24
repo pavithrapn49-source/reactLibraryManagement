@@ -139,30 +139,23 @@ const MemberDashboard = () => {
             <p>
               Status:{" "}
               <strong>
-                {book.availabilityStatus ? "Available" : "Borrowed"}
+                {book.available ? "Available" : "Borrowed"}
               </strong>
             </p>
 
-            {/* Borrow Button */}
-            {book.availabilityStatus && (
-              <button
-                className="borrow-btn"
-                onClick={() => borrowBook(book._id)}
-              >
-                Borrow
-              </button>
-            )}
+          {/* Borrow Button */}
+          {book.available && (
+            <button onClick={() => borrowBook(book._id)}>
+              Borrow
+            </button>
+          )}
 
-            {/* Reserve Button */}
-            {!book.availabilityStatus && (
-              <button
-                className="reserve-btn"
-                onClick={() => reserveBook(book._id)}
-              >
-                Reserve
-              </button>
-            )}
-
+          {/* Reserve Button */}
+          {!book.available && (
+            <button onClick={() => reserveBook(book._id)}>
+              Reserve
+            </button>
+          )}
           </div>
         ))}
       </div>
@@ -175,34 +168,34 @@ const MemberDashboard = () => {
 
         {myBorrows.length === 0 && <p>No borrowed books</p>}
 
-     {myBorrows
-  .filter((borrow) => borrow.book) 
-  .map((borrow) => {
+        {myBorrows
+          .filter((borrow) => borrow.book) 
+          .map((borrow) => {
 
-    const dueDate = borrow.dueDate
-      ? new Date(borrow.dueDate).toLocaleDateString()
-      : "N/A";
+            const dueDate = borrow.dueDate
+              ? new Date(borrow.dueDate).toLocaleDateString()
+              : "N/A";
 
-    return (
-      <div key={borrow._id} className="book-card">
+            return (
+              <div key={borrow._id} className="book-card">
 
-        <h4>{borrow.book.title}</h4>
-        <p>{borrow.book.author}</p>
+                <h4>{borrow.book.title}</h4>
+                <p>{borrow.book.author}</p>
 
-        <p>
-          Due Date: <strong>{dueDate}</strong>
-        </p>
+                <p>
+                  Due Date: <strong>{dueDate}</strong>
+                </p>
 
-        <button
-          className="return-btn"
-          onClick={() => returnBook(borrow._id)}
-        >
-          Return
-        </button>
+                <button
+                  className="return-btn"
+                  onClick={() => returnBook(borrow._id)}
+                >
+                  Return
+                </button>
 
-      </div>
-    );
-})}
+              </div>
+            );
+          })}
       </div>
 
     </div>
