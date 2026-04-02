@@ -1,17 +1,21 @@
 import axios from "axios";
 
-const API = axios.create({
-  baseURL: "https://library-management-backend-0un8.onrender.com",
+const instance = axios.create({
+  baseURL: "https://library-management-backend-0un8.onrender.com/api",
 });
 
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
 
-  if (token) {
-    req.headers.Authorization = `Bearer ${token}`;
-  }
+instance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
 
-  return req;
-});
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-export default API;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export default instance;

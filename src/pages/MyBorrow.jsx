@@ -1,46 +1,45 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import Sidebar from "../components/SideBar.jsx";
+import axios from "../api/axios";
 
-export default function MyBorrow() {
+const MyBorrow = () => {
   const [borrows, setBorrows] = useState([]);
-  const token = localStorage.getItem("token");
+const fetchBorrows = async () => {
+  const res = await axios.get("/borrow/my-borrows"); // ✅ FIX
+  setBorrows(res.data);
+};
 
   useEffect(() => {
     fetchBorrows();
   }, []);
 
-  const fetchBorrows = async () => {
-    const res = await axios.get("http://localhost:5000/api/borrow/my", {
-      headers: { authorization: token }
-    });
-    setBorrows(res.data);
-  };
-
-  const returnBook = async (id) => {
-    await axios.put(`http://localhost:5000/api/borrow/return/${id}`,
-      {},
-      { headers: { authorization: token } }
-    );
+  const handleReturn = async (id) => {
+    await axios.put(`/borrow/return/${id}`);
+    alert("Returned!");
     fetchBorrows();
   };
 
   return (
-    <div style={{ display: "flex" }}>
-      <Sidebar />
-      <div style={{ padding: "20px" }}>
-        <h2>My Borrowed Books</h2>
+    <div>
+      <h2>📖 My Borrowed Books</h2>
 
-        <ul>
-          {borrows.map(b => (
-            <li key={b._id}>
-              {b.book.title} - {b.status}
-              {b.status === "issued" &&
-                <button onClick={() => returnBook(b._id)}>Return</button>}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {borrows.map((b) => {
+        const isLate = new Date(b.dueDate) < new Date();
+
+        return (
+          <div key={b._id} className="borrow-card">
+            <h3>{b.book.title}</h3>
+            <p>Due: {new Date(b.dueDate).toDateString()}</p>
+
+            {isLate && <p style={{ color: "red" }}>⚠ Overdue</p>}
+
+            <button onClick={() => handleReturn(b._id)}>
+              Return
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
-}
+};
+
+export default MyBorrow;

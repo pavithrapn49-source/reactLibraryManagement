@@ -1,63 +1,50 @@
-import "../styles/books.css";
+import { useEffect, useState } from "react";
+import axios from "../api/axios";
 
-export default function Books() {
-  const books = [
-    {
-      title: "React Guide",
-      author: "Pavi",
-      price: 499,
-      image: "https://covers.openlibrary.org/b/id/10909258-L.jpg",
-    },
-    {
-      title: "Java Guide",
-      author: "Anandh",
-      price: 699,
-      image: "https://covers.openlibrary.org/b/id/10521270-L.jpg",
-    },
-    {
-      title: "Harry Potter",
-      author: "J.K. Rowling",
-      price: 999,
-      image: "https://images-na.ssl-images-amazon.com/images/I/81YOuOGFCJL.jpg",
-    },
-    {
-      title: "Geographical Tale",
-      author: "Ramu",
-      price: 980,
-      image: "https://images-na.ssl-images-amazon.com/images/I/71uAI28kJuL.jpg",
-    },
-    {
-      title: "Children's Tale",
-      author: "Saanvi",
-      price: 600,
-      image: "https://images-na.ssl-images-amazon.com/images/I/81eB+7+CkUL.jpg",
-    },
-  ];
+const Books = () => {
+  const [books, setBooks] = useState([]);
+  const [search, setSearch] = useState("");
+
+  const fetchBooks = async () => {
+    const res = await axios.get("/books");
+    setBooks(res.data);
+  };
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  const filteredBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="books-page">
-      <h1 className="books-title">📚 Library Collection</h1>
-      <p className="books-subtitle">
-        Discover books curated just for you
-      </p>
+    <div className="p-4">
+      <h2>📚 Books</h2>
 
-      <div className="books-grid">
-        {books.map((book, index) => (
-          <div className="book-card" key={index}>
-            <img
-              src={book.image}
-              alt={book.title}
-              className="book-image"
-            />
+      <input
+        type="text"
+        placeholder="Search books..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="search-box"
+      />
 
-            <div className="book-content">
-              <h3>{book.title}</h3>
-              <p className="author">✍ {book.author}</p>
-              <p className="price">₹{book.price}</p>
-            </div>
+      <div className="book-grid">
+        {filteredBooks.map((book) => (
+          <div className="book-card" key={book._id}>
+            <h3>{book.title}</h3>
+            <p>{book.author}</p>
+
+            <p>
+              Status:{" "}
+              {book.available ? "✅ Available" : "❌ Borrowed"}
+            </p>
           </div>
         ))}
       </div>
     </div>
   );
-}
+};
+
+export default Books;
