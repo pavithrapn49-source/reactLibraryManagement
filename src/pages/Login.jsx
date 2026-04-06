@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/login.css";
 
+
+
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -40,7 +42,10 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <h2>Login</h2>
+      <div className="login-card">
+      <h2>Welcome Back 👋</h2>
+      <p className="subtitle">Login to your account</p>
+
 
       <form onSubmit={handleSubmit} autoComplete="off">
         <input
@@ -83,6 +88,7 @@ const Login = () => {
           Register here
         </button>
       </p>
+      </div>
     </div>
   );
 };

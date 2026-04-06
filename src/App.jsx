@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
@@ -10,8 +10,13 @@ import MyBorrow from "./pages/MyBorrow";
 import PayFine from "./pages/PayFine";
 import Books from "./pages/Books";
 import { useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-/* 🔐 PROTECTED DASHBOARD */
+/* 🔔 TOAST IMPORT */
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+/* 🔐 DASHBOARD */
 const Dashboard = () => {
   const { user } = useAuth();
 
@@ -20,30 +25,99 @@ const Dashboard = () => {
   if (user.role === "admin") return <AdminDashboard />;
   if (user.role === "librarian") return <LibrarianDashboard />;
 
-  return <MemberDashboard />; // default
+  return <MemberDashboard />;
 };
 
-function App() {
+/* 🔥 NEW WRAPPER COMPONENT */
+const AppContent = () => {
+  const location = useLocation();
+
   return (
-    <Router>
-      <Navbar />
+    <>
+      {/* 🚫 HIDE NAVBAR ON LOGIN */}
+      {location.pathname !== "/login" &&
+        location.pathname !== "/" && <Navbar />}
+
+      {/* 🔔 GLOBAL TOAST (ADD HERE) */}
+      <ToastContainer position="top-right" autoClose={2000} />
+
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* ✅ SINGLE DASHBOARD ROUTE */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* optional direct routes */}
-        <Route path="/member" element={<MemberDashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/librarian" element={<LibrarianDashboard />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/books" element={<Books />} />
-        <Route path="/my-borrows" element={<MyBorrow />} />
-        <Route path="/pay-fine" element={<PayFine />} />
+        <Route
+          path="/librarian"
+          element={
+            <ProtectedRoute role="librarian">
+              <LibrarianDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/member"
+          element={
+            <ProtectedRoute role="member">
+              <MemberDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/books"
+          element={
+            <ProtectedRoute>
+              <Books />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-borrows"
+          element={
+            <ProtectedRoute>
+              <MyBorrow />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/pay-fine"
+          element={
+            <ProtectedRoute>
+              <PayFine />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
+    </>
+  );
+};
+
+/* 🚀 MAIN APP */
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

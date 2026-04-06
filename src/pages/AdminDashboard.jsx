@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "../api/axios";
-import "../styles/adminDashboard.css";
+import "../styles/admindashboard.css";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
-// ✅ Book images
+/* ✅ IMAGE MAP */
 const bookImages = {
   "React Guide": "/react guide.jpg",
   "Geographical Tales": "/geo tales.jpg",
@@ -19,12 +20,15 @@ const AdminDashboard = () => {
   const [books, setBooks] = useState([]);
   const [users, setUsers] = useState([]);
 
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
     isbn: "",
     genre: "",
-    publicationYear: ""
+    publicationYear: "",
   });
 
   const [editBook, setEditBook] = useState(null);
@@ -32,13 +36,13 @@ const AdminDashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  // ================= LOGOUT =================
+  /* ================= LOGOUT ================= */
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  // ================= FETCH BOOKS =================
+  /* ================= FETCH ================= */
   const fetchBooks = async () => {
     try {
       const res = await axios.get("/books");
@@ -48,7 +52,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // ================= FETCH USERS =================
   const fetchUsers = async () => {
     try {
       const res = await axios.get("/auth/users");
@@ -63,39 +66,36 @@ const AdminDashboard = () => {
     fetchUsers();
   }, []);
 
-  // ================= INPUT CHANGE =================
-  const handleChange = (e) => {
-    setNewBook({
-      ...newBook,
-      [e.target.name]: e.target.value
-    });
-  };
+  /* ================= FILTER ================= */
+  let filteredBooks = books.filter((b) =>
+    b.title.toLowerCase().includes(search.toLowerCase())
+  );
 
-  // ================= ADD BOOK =================
+  if (filter === "available") {
+    filteredBooks = filteredBooks.filter((b) => b.available);
+  } else if (filter === "borrowed") {
+    filteredBooks = filteredBooks.filter((b) => !b.available);
+  }
+
+  /* ================= ADD ================= */
   const addBook = async () => {
     try {
       await axios.post("/books", newBook);
-
-      alert("Book added successfully");
-
       setNewBook({
         title: "",
         author: "",
         isbn: "",
         genre: "",
-        publicationYear: ""
+        publicationYear: "",
       });
-
       fetchBooks();
     } catch {
       alert("Failed to add book");
     }
   };
 
-  // ================= DELETE BOOK =================
+  /* ================= DELETE ================= */
   const deleteBook = async (id) => {
-    if (!window.confirm("Delete this book?")) return;
-
     try {
       await axios.delete(`/books/${id}`);
       fetchBooks();
@@ -104,10 +104,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // ================= DELETE USER =================
   const deleteUser = async (id) => {
-    if (!window.confirm("Delete this user?")) return;
-
     try {
       await axios.delete(`/auth/users/${id}`);
       fetchUsers();
@@ -116,13 +113,10 @@ const AdminDashboard = () => {
     }
   };
 
-  // ================= UPDATE BOOK =================
+  /* ================= UPDATE ================= */
   const updateBook = async () => {
     try {
       await axios.put(`/books/${editBook._id}`, editBook);
-
-      alert("Book updated successfully");
-
       setEditBook(null);
       fetchBooks();
     } catch {
@@ -131,16 +125,15 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="admin-container">
 
-      {/* HEADER */}
-      <div style={{ textAlign: "right" }}>
+      {/* ================= HEADER ================= */}
+      <div className="admin-header">
+        <h2>👑 Admin Dashboard</h2>
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
       </div>
-
-      <h2>👑 Admin Dashboard</h2>
 
       {/* ================= STATS ================= */}
       <div className="stats-container">
@@ -151,40 +144,89 @@ const AdminDashboard = () => {
 
         <div className="stat-card">
           <h4>Available</h4>
-          <p>{books.filter(b => b.available).length}</p>
+          <p>{books.filter((b) => b.available).length}</p>
         </div>
 
         <div className="stat-card">
           <h4>Borrowed</h4>
-          <p>{books.filter(b => !b.available).length}</p>
+          <p>{books.filter((b) => !b.available).length}</p>
         </div>
 
         <div className="stat-card">
-          <h4>Total Users</h4>
+          <h4>Users</h4>
           <p>{users.length}</p>
         </div>
       </div>
 
-      {/* ================= ADD BOOK ================= */}
-      <h3>Add New Book</h3>
+      {/* ================= SEARCH + FILTER ================= */}
+      <input
+        className="search-bar"
+        placeholder="🔍 Search books..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
+      <select onChange={(e) => setFilter(e.target.value)}>
+        <option value="all">All</option>
+        <option value="available">Available</option>
+        <option value="borrowed">Borrowed</option>
+      </select>
+
+      {/* ================= ADD BOOK ================= */}
+      <h3>➕ Add Book</h3>
       <div className="add-book-form">
-        <input placeholder="Title" name="title" value={newBook.title} onChange={handleChange} />
-        <input placeholder="Author" name="author" value={newBook.author} onChange={handleChange} />
-        <input placeholder="ISBN" name="isbn" value={newBook.isbn} onChange={handleChange} />
-        <input placeholder="Genre" name="genre" value={newBook.genre} onChange={handleChange} />
-        <input placeholder="Year" name="publicationYear" value={newBook.publicationYear} onChange={handleChange} />
+        <input
+          placeholder="Title"
+          value={newBook.title}
+          onChange={(e) =>
+            setNewBook({ ...newBook, title: e.target.value })
+          }
+        />
+        <input
+          placeholder="Author"
+          value={newBook.author}
+          onChange={(e) =>
+            setNewBook({ ...newBook, author: e.target.value })
+          }
+        />
+        <input
+          placeholder="ISBN"
+          value={newBook.isbn}
+          onChange={(e) =>
+            setNewBook({ ...newBook, isbn: e.target.value })
+          }
+        />
+        <input
+          placeholder="Genre"
+          value={newBook.genre}
+          onChange={(e) =>
+            setNewBook({ ...newBook, genre: e.target.value })
+          }
+        />
+        <input
+          placeholder="Year"
+          value={newBook.publicationYear}
+          onChange={(e) =>
+            setNewBook({
+              ...newBook,
+              publicationYear: e.target.value,
+            })
+          }
+        />
 
         <button onClick={addBook}>Add Book</button>
       </div>
 
       {/* ================= BOOK LIST ================= */}
-      <h3 style={{ marginTop: "40px" }}>All Books</h3>
+      <h3>📚 All Books</h3>
 
       <div className="book-grid">
-        {books.map((b) => (
-          <div key={b._id} className="book-card">
-
+        {filteredBooks.map((b) => (
+          <motion.div
+            key={b._id}
+            className="book-card"
+            whileHover={{ scale: 1.05 }}
+          >
             <img
               src={bookImages[b.title] || "/default.jpg"}
               alt={b.title}
@@ -193,57 +235,68 @@ const AdminDashboard = () => {
             />
 
             <h4>{b.title}</h4>
-            <p>Author: {b.author}</p>
-            <p>ISBN: {b.isbn}</p>
-            <p>Genre: {b.genre}</p>
-            <p>Year: {b.publicationYear}</p>
+            <p>{b.author}</p>
 
-            {/* ✅ FIXED STATUS */}
             <p>
-              Status:{" "}
-              {b.available
-                ? "Available"
-                : b.isReserved
-                ? "Reserved"
-                : "Borrowed"}
+              {b.available ? "🟢 Available" : "🔴 Borrowed"}
             </p>
 
-            <button onClick={() => setEditBook(b)}>Edit</button>
-            <button onClick={() => deleteBook(b._id)}>Delete</button>
-          </div>
+            <button onClick={() => setEditBook(b)}>
+              Edit
+            </button>
+
+            <button onClick={() => deleteBook(b._id)}>
+              Delete
+            </button>
+          </motion.div>
         ))}
       </div>
 
-      {/* ================= EDIT BOOK ================= */}
+      {filteredBooks.length === 0 && <p>No books found 📭</p>}
+
+      {/* ================= EDIT POPUP ================= */}
       {editBook && (
         <div className="edit-popup">
           <h3>Edit Book</h3>
 
-          <input value={editBook.title} onChange={(e) => setEditBook({ ...editBook, title: e.target.value })} />
-          <input value={editBook.author} onChange={(e) => setEditBook({ ...editBook, author: e.target.value })} />
-          <input value={editBook.isbn} onChange={(e) => setEditBook({ ...editBook, isbn: e.target.value })} />
-          <input value={editBook.genre} onChange={(e) => setEditBook({ ...editBook, genre: e.target.value })} />
-          <input value={editBook.publicationYear} onChange={(e) => setEditBook({ ...editBook, publicationYear: e.target.value })} />
+          <input
+            value={editBook.title}
+            onChange={(e) =>
+              setEditBook({ ...editBook, title: e.target.value })
+            }
+          />
+          <input
+            value={editBook.author}
+            onChange={(e) =>
+              setEditBook({ ...editBook, author: e.target.value })
+            }
+          />
 
           <button onClick={updateBook}>Update</button>
-          <button onClick={() => setEditBook(null)}>Cancel</button>
+          <button onClick={() => setEditBook(null)}>
+            Cancel
+          </button>
         </div>
       )}
 
       {/* ================= USERS ================= */}
-      <h3 style={{ marginTop: "40px" }}>All Users</h3>
+      <h3>👥 Users</h3>
 
       <div className="user-grid">
         {users.map((u) => (
-          <div key={u._id} className="user-card">
+          <motion.div
+            key={u._id}
+            className="user-card"
+            whileHover={{ scale: 1.05 }}
+          >
             <h4>{u.name}</h4>
             <p>{u.email}</p>
-            <p>Role: {u.role}</p>
+            <p>{u.role}</p>
 
             <button onClick={() => deleteUser(u._id)}>
-              Delete User
+              Delete
             </button>
-          </div>
+          </motion.div>
         ))}
       </div>
 

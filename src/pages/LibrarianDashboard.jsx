@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../api/axios"; // ✅ use your axios instance
 import "../styles/librarianDashboard.css";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -22,38 +22,43 @@ const LibrarianDashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token");
-
+  /* ================= LOGOUT ================= */
   const handleLogout = () => {
     logout();
-    localStorage.removeItem("token");
     navigate("/login");
   };
 
+  /* ================= FETCH ================= */
   const fetchBooks = async () => {
-    const res = await axios.get("https://library-management-backend-0un8.onrender.com/api/books", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setBooks(res.data);
+    try {
+      const res = await axios.get("/books");
+      setBooks(res.data);
+    } catch (err) {
+      alert("Failed to fetch books");
+    }
   };
 
+  /* ================= ADD ================= */
   const addBook = async (e) => {
     e.preventDefault();
-    await axios.post(
-      "https://library-management-backend-0un8.onrender.com/api/books",
-      { title, author },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setTitle("");
-    setAuthor("");
-    fetchBooks();
+    try {
+      await axios.post("/books", { title, author });
+      setTitle("");
+      setAuthor("");
+      fetchBooks();
+    } catch (err) {
+      alert("Failed to add book");
+    }
   };
 
+  /* ================= DELETE ================= */
   const deleteBook = async (id) => {
-    await axios.delete(`https://library-management-backend-0un8.onrender.com/api/books/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    fetchBooks();
+    try {
+      await axios.delete(`/books/${id}`);
+      fetchBooks();
+    } catch (err) {
+      alert("Delete failed");
+    }
   };
 
   useEffect(() => {
@@ -61,17 +66,17 @@ const LibrarianDashboard = () => {
   }, []);
 
   return (
-    <div className="dashboard-container">
+    <div className="librarian-container">
 
-      {/* ✅ Logout Button */}
-      <div style={{ textAlign: "right" }}>
+      {/* 🔝 HEADER */}
+      <div className="librarian-header">
+        <h2>📚 Librarian Dashboard</h2>
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
       </div>
 
-      <h2>📚 Librarian Dashboard</h2>
-
+      {/* ➕ ADD BOOK */}
       <form onSubmit={addBook} className="add-book-form">
         <input
           placeholder="Book Title"
@@ -88,21 +93,35 @@ const LibrarianDashboard = () => {
         <button type="submit">Add Book</button>
       </form>
 
+      {/* 📚 BOOK LIST */}
       <div className="book-grid">
         {books.map((b) => (
           <div key={b._id} className="book-card">
             <img
               src={bookImages[b.title] || "/default.jpg"}
               alt={b.title}
+              className="book-image"
               onError={(e) => (e.target.src = "/default.jpg")}
             />
+
             <h4>{b.title}</h4>
             <p>{b.author}</p>
-            <p>{b.borrowed ? "Borrowed" : "Available"}</p>
-            <button onClick={() => deleteBook(b._id)}>Delete</button>
+
+            <p className={b.available ? "available" : "borrowed"}>
+              {b.available ? "🟢 Available" : "🔴 Borrowed"}
+            </p>
+
+            <button
+              className="delete-btn"
+              onClick={() => deleteBook(b._id)}
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>
+
+      {books.length === 0 && <p>No books available 📭</p>}
     </div>
   );
 };

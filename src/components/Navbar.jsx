@@ -1,47 +1,51 @@
-import { Link } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "../styles/Navbar.css";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // 🔐 Role-based dashboard
+  const getDashboardPath = () => {
+    if (user?.role === "admin") return "/admin";
+    if (user?.role === "librarian") return "/librarian";
+    return "/member";
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
-    <nav
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        padding: "10px 20px",
-        background: "#333",
-        color: "white",
-      }}
-    >
-      <h2>📚 Library</h2>
+    <nav className="navbar">
+      <div className="logo">📚 Library</div>
 
-      <div style={{ display: "flex", gap: "15px" }}>
-        <Link
-          to={
-            user?.role === "admin"
-              ? "/admin"
-              : user?.role === "librarian"
-              ? "/librarian"
-              : "/member"
-          }
-          style={{ color: "white" }}
-        >
-          Dashboard
-        </Link>
+      <div className="nav-links">
+        {/* 🎯 Role-based dashboard */}
+        <NavLink to={getDashboardPath()}>Dashboard</NavLink>
 
-        <Link to="/books" style={{ color: "white" }}>
-          Books
-        </Link>
+        <NavLink to="/books">Books</NavLink>
 
-        <Link to="/my-borrows" style={{ color: "white" }}>
-          My Books
-        </Link>
+        {/* 👤 Only member features */}
+        {user?.role === "member" && (
+          <>
+            <NavLink to="/my-borrows">My Books</NavLink>
+            <NavLink to="/pay-fine">Pay Fine</NavLink>
+          </>
+        )}
 
-        <Link to="/pay-fine" style={{ color: "white" }}>
-          Pay Fine
-        </Link>
+        {/* 👑 Admin only */}
+        {user?.role === "admin" && (
+          <NavLink to="/admin">Admin Panel</NavLink>
+        )}
       </div>
+
+      {/* 🔴 Logout */}
+      <button className="logout-btn" onClick={handleLogout}>
+        Logout
+      </button>
     </nav>
   );
 };
