@@ -1,0 +1,171 @@
+/* ================================
+   FUTURISTIC TECH REGISTER PAGE
+   src/styles/register.css
+================================ */
+
+/* Reset */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Full Page */
+.register-page{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  position:relative;
+  background:
+    radial-gradient(circle at top left, #ff0080 0%, transparent 35%),
+    radial-gradient(circle at bottom right, #00eaff 0%, transparent 35%),
+    linear-gradient(135deg,#09090f,#111827,#0f172a);
+}
+
+/* Animated Glow Background */
+.register-page::before{
+  content:"";
+  position:absolute;
+  width:500px;
+  height:500px;
+  background:linear-gradient(45deg,#00f0ff,#ff00c8);
+  filter:blur(120px);
+  opacity:0.25;
+  border-radius:50%;
+  top:-100px;
+  left:-120px;
+  animation:floatGlow 8s ease-in-out infinite alternate;
+}
+
+.register-page::after{
+  content:"";
+  position:absolute;
+  width:450px;
+  height:450px;
+  background:linear-gradient(45deg,#7c3aed,#00ff88);
+  filter:blur(120px);
+  opacity:0.22;
+  border-radius:50%;
+  bottom:-120px;
+  right:-120px;
+  animation:floatGlow2 10s ease-in-out infinite alternate;
+}
+
+@keyframes floatGlow{
+  from{transform:translateY(0px);}
+  to{transform:translateY(80px);}
+}
+
+@keyframes floatGlow2{
+  from{transform:translateY(0px);}
+  to{transform:translateY(-70px);}
+}
+
+/* Register Card */
+.register-card{
+  width:430px;
+  padding:38px;
+  border-radius:24px;
+  background:rgba(255,255,255,0.07);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,0.15);
+  box-shadow:0 0 40px rgba(0,255,255,0.08);
+  position:relative;
+  z-index:2;
+}
+
+/* Heading */
+.register-card h2{
+  color:white;
+  font-size:30px;
+  margin-bottom:8px;
+  text-align:center;
+}
+
+.register-card p{
+  color:#cbd5e1;
+  text-align:center;
+  margin-bottom:24px;
+  font-size:15px;
+}
+
+/* Inputs */
+.register-input{
+  width:100%;
+  padding:14px 16px;
+  margin-bottom:16px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.08);
+  color:white;
+  outline:none;
+  font-size:15px;
+  transition:0.3s;
+}
+
+.register-input::placeholder{
+  color:rgba(255,255,255,0.6);
+}
+
+.register-input:focus{
+  border:1px solid #00f0ff;
+  box-shadow:0 0 12px rgba(0,255,255,0.35);
+}
+
+/* Select */
+.register-input option{
+  color:black;
+}
+
+/* Button */
+.register-btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(90deg,#ff00c8,#7c3aed,#00eaff);
+  background-size:200% auto;
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.4s;
+}
+
+.register-btn:hover{
+  background-position:right center;
+  transform:translateY(-2px);
+  box-shadow:0 0 18px rgba(255,0,200,0.35);
+}
+
+/* Footer */
+.register-footer{
+  margin-top:18px;
+  text-align:center;
+  color:#cbd5e1;
+  font-size:14px;
+}
+
+.register-footer span{
+  color:#00f0ff;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.register-footer span:hover{
+  text-decoration:underline;
+}
+
+/* Responsive */
+@media(max-width:500px){
+  .register-card{
+    width:92%;
+    padding:28px;
+  }
+}

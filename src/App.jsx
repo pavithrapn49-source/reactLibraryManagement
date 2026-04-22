@@ -11,6 +11,7 @@ import PayFine from "./pages/PayFine";
 import Books from "./pages/Books";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Unauthorized from "./pages/Unauthorized";
 
 /* 🔔 TOAST IMPORT */
 import { ToastContainer } from "react-toastify";
@@ -18,7 +19,9 @@ import "react-toastify/dist/ReactToastify.css";
 
 /* 🔐 DASHBOARD */
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, authLoading } = useAuth();
+
+  if (authLoading) return <h2>Loading...</h2>;
 
   if (!user) return <Navigate to="/login" />;
 
@@ -28,17 +31,19 @@ const Dashboard = () => {
   return <MemberDashboard />;
 };
 
-/* 🔥 NEW WRAPPER COMPONENT */
+/* 🔥 WRAPPER COMPONENT */
 const AppContent = () => {
   const location = useLocation();
+  const { user } = useAuth();
+
+  const hideNavbarPaths = ["/login", "/register", "/"];
 
   return (
     <>
-      {/* 🚫 HIDE NAVBAR ON LOGIN */}
-      {location.pathname !== "/login" &&
-        location.pathname !== "/" && <Navbar />}
+      {/* 🚫 Hide Navbar on login/register */}
+      {!hideNavbarPaths.includes(location.pathname) && <Navbar />}
 
-      {/* 🔔 GLOBAL TOAST (ADD HERE) */}
+      {/* 🔔 Global Toast */}
       <ToastContainer position="top-right" autoClose={2000} />
 
       <Routes>
@@ -46,41 +51,37 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+        {/* Role-based dashboard */}
+        <Route path="/dashboard" element={<Dashboard />} />
+
+        <Route path="/unauthorized" element={<Unauthorized />} />
 
         <Route
-          path="/admin"
-          element={
-            <ProtectedRoute role="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
+  path="/admin"
+  element={
+    <ProtectedRoute role="admin">
+      <AdminDashboard />
+    </ProtectedRoute>
+  }
+/>
 
-        <Route
-          path="/librarian"
-          element={
-            <ProtectedRoute role="librarian">
-              <LibrarianDashboard />
-            </ProtectedRoute>
-          }
-        />
+<Route
+  path="/librarian"
+  element={
+    <ProtectedRoute role="librarian">
+      <LibrarianDashboard />
+    </ProtectedRoute>
+  }
+/>
 
-        <Route
-          path="/member"
-          element={
-            <ProtectedRoute role="member">
-              <MemberDashboard />
-            </ProtectedRoute>
-          }
-        />
+<Route
+  path="/member"
+  element={
+    <ProtectedRoute role="member">
+      <MemberDashboard />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/books"
@@ -94,7 +95,7 @@ const AppContent = () => {
         <Route
           path="/my-borrows"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="member">
               <MyBorrow />
             </ProtectedRoute>
           }
@@ -103,7 +104,7 @@ const AppContent = () => {
         <Route
           path="/pay-fine"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="member">
               <PayFine />
             </ProtectedRoute>
           }

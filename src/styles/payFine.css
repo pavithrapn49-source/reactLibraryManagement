@@ -1,0 +1,114 @@
+/* ==========================
+   PAY FINE PAGE
+========================== */
+
+.payfine-page {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f7fb;
+}
+
+/* Main content area */
+.payfine-content {
+  flex: 1;
+  margin-left: 270px;   /* sidebar width */
+  padding: 30px;
+}
+
+/* Title */
+.payfine-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 25px;
+}
+
+/* Summary Card */
+.payfine-summary {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  color: white;
+  padding: 25px;
+  border-radius: 16px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.payfine-summary h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+/* Empty Fine */
+.no-fine {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: #16a34a;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+}
+
+/* Fine cards */
+.fine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.fine-card {
+  background: white;
+  padding: 22px;
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+}
+
+.fine-card h3 {
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: #111;
+}
+
+.fine-card p {
+  margin: 8px 0;
+  color: #444;
+}
+
+/* Fine amount */
+.fine-amount {
+  color: #ef4444;
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+/* Button */
+.pay-btn {
+  width: 100%;
+  margin-top: 18px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 17px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.pay-btn:hover {
+  background: #15803d;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .payfine-content {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .payfine-title {
+    font-size: 24px;
+  }
+}

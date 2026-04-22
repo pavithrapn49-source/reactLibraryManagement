@@ -1,51 +1,117 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import "../styles/Navbar.css";
+import "../styles/navbar.css";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // 🔐 Role-based dashboard
-  const getDashboardPath = () => {
-    if (user?.role === "admin") return "/admin";
-    if (user?.role === "librarian") return "/librarian";
-    return "/member";
-  };
-
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/login");
   };
 
+  /* ================= ROLE DASHBOARD ================= */
+  const getDashboardRoute = () => {
+    if (user?.role === "admin") return "/admin";
+    if (user?.role === "librarian") return "/librarian";
+    return "/dashboard";
+  };
+
+  const userName = user?.name || "User";
+  const userRole = user?.role || "member";
+
   return (
     <nav className="navbar">
-      <div className="logo">📚 Library</div>
+      {/* ================= LOGO ================= */}
+      <div
+        className="logo"
+        onClick={() => navigate(getDashboardRoute())}
+      >
+        📚 Smart Library
+      </div>
 
+      {/* ================= LINKS ================= */}
       <div className="nav-links">
-        {/* 🎯 Role-based dashboard */}
-        <NavLink to={getDashboardPath()}>Dashboard</NavLink>
+        <NavLink
+          to={getDashboardRoute()}
+          className={({ isActive }) =>
+            isActive ? "nav-link active-link" : "nav-link"
+          }
+        >
+          Dashboard
+        </NavLink>
 
-        <NavLink to="/books">Books</NavLink>
+        <NavLink
+          to="/books"
+          className={({ isActive }) =>
+            isActive ? "nav-link active-link" : "nav-link"
+          }
+        >
+          Books
+        </NavLink>
 
-        {/* 👤 Only member features */}
-        {user?.role === "member" && (
+        {/* MEMBER LINKS */}
+        {userRole === "member" && (
           <>
-            <NavLink to="/my-borrows">My Books</NavLink>
-            <NavLink to="/pay-fine">Pay Fine</NavLink>
+            <NavLink
+              to="/my-borrows"
+              className={({ isActive }) =>
+                isActive ? "nav-link active-link" : "nav-link"
+              }
+            >
+              My Books
+            </NavLink>
+
+            <NavLink
+              to="/pay-fine"
+              className={({ isActive }) =>
+                isActive ? "nav-link active-link" : "nav-link"
+              }
+            >
+              Pay Fine
+            </NavLink>
           </>
         )}
 
-        {/* 👑 Admin only */}
-        {user?.role === "admin" && (
-          <NavLink to="/admin">Admin Panel</NavLink>
+        {/* ADMIN LINK */}
+        {userRole === "admin" && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) =>
+              isActive ? "nav-link active-link" : "nav-link"
+            }
+          >
+            Admin Panel
+          </NavLink>
+        )}
+
+        {/* LIBRARIAN LINK */}
+        {userRole === "librarian" && (
+          <NavLink
+            to="/librarian"
+            className={({ isActive }) =>
+              isActive ? "nav-link active-link" : "nav-link"
+            }
+          >
+            Librarian Panel
+          </NavLink>
         )}
       </div>
 
-      {/* 🔴 Logout */}
-      <button className="logout-btn" onClick={handleLogout}>
-        Logout
-      </button>
+      {/* ================= RIGHT SIDE ================= */}
+      <div className="nav-right">
+        <span className="user-role">
+          👤 {userName} ({userRole})
+        </span>
+
+        <button
+          className="logout-btn"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+      </div>
     </nav>
   );
 };

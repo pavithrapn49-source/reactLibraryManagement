@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import axios from "../api/axios";
 import "../styles/admindashboard.css";
 import { useAuth } from "../context/AuthContext";
+import DashboardCharts from "../components/DashboardCharts";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
-/* ✅ IMAGE MAP */
+/* ================= BOOK IMAGES ================= */
 const bookImages = {
   "React Guide": "/react guide.jpg",
   "Geographical Tales": "/geo tales.jpg",
@@ -17,11 +19,14 @@ const bookImages = {
 };
 
 const AdminDashboard = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
   const [books, setBooks] = useState([]);
   const [users, setUsers] = useState([]);
-
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
 
   const [newBook, setNewBook] = useState({
     title: "",
@@ -33,8 +38,11 @@ const AdminDashboard = () => {
 
   const [editBook, setEditBook] = useState(null);
 
-  const { logout } = useAuth();
-  const navigate = useNavigate();
+  const authHeaders = () => ({
+    headers: {
+      Authorization: `Bearer ${user?.token}`,
+    },
+  });
 
   /* ================= LOGOUT ================= */
   const handleLogout = () => {
@@ -44,43 +52,36 @@ const AdminDashboard = () => {
 
   /* ================= FETCH ================= */
   const fetchBooks = async () => {
-    try {
-      const res = await axios.get("/books");
-      setBooks(res.data);
-    } catch {
-      alert("Error fetching books");
-    }
+    const res = await axios.get("/books", authHeaders());
+    setBooks(res.data);
   };
 
   const fetchUsers = async () => {
+    const res = await axios.get("/users", authHeaders());
+    setUsers(res.data);
+  };
+
+  const loadDashboard = async () => {
     try {
-      const res = await axios.get("/auth/users");
-      setUsers(res.data);
+      setLoading(true);
+      await Promise.all([fetchBooks(), fetchUsers()]);
     } catch {
-      alert("Error fetching users");
+      toast.error("Failed to load dashboard");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBooks();
-    fetchUsers();
-  }, []);
+    if (user?.token) loadDashboard();
+  }, [user]);
 
-  /* ================= FILTER ================= */
-  let filteredBooks = books.filter((b) =>
-    b.title.toLowerCase().includes(search.toLowerCase())
-  );
-
-  if (filter === "available") {
-    filteredBooks = filteredBooks.filter((b) => b.available);
-  } else if (filter === "borrowed") {
-    filteredBooks = filteredBooks.filter((b) => !b.available);
-  }
-
-  /* ================= ADD ================= */
+  /* ================= CRUD ================= */
   const addBook = async () => {
     try {
-      await axios.post("/books", newBook);
+      await axios.post("/books", newBook, authHeaders());
+      toast.success("Book added");
+
       setNewBook({
         title: "",
         author: "",
@@ -88,54 +89,87 @@ const AdminDashboard = () => {
         genre: "",
         publicationYear: "",
       });
+
       fetchBooks();
     } catch {
-      alert("Failed to add book");
+      toast.error("Failed to add book");
     }
   };
 
-  /* ================= DELETE ================= */
   const deleteBook = async (id) => {
     try {
-      await axios.delete(`/books/${id}`);
+      await axios.delete(`/books/${id}`, authHeaders());
+      toast.success("Book deleted");
       fetchBooks();
     } catch {
-      alert("Delete failed");
+      toast.error("Delete failed");
+    }
+  };
+
+  const updateBook = async () => {
+    try {
+      await axios.put(`/books/${editBook._id}`, editBook, authHeaders());
+      toast.success("Book updated");
+      setEditBook(null);
+      fetchBooks();
+    } catch {
+      toast.error("Update failed");
     }
   };
 
   const deleteUser = async (id) => {
     try {
-      await axios.delete(`/auth/users/${id}`);
+      await axios.delete(`/users/${id}`, authHeaders());
+      toast.success("User deleted");
       fetchUsers();
     } catch {
-      alert("Delete user failed");
+      toast.error("Delete user failed");
     }
   };
 
-  /* ================= UPDATE ================= */
-  const updateBook = async () => {
-    try {
-      await axios.put(`/books/${editBook._id}`, editBook);
-      setEditBook(null);
-      fetchBooks();
-    } catch {
-      alert("Update failed");
-    }
+  /* ================= FILTER ================= */
+  let filteredBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (filter === "available") {
+    filteredBooks = filteredBooks.filter((b) => b.available);
+  }
+
+  if (filter === "borrowed") {
+    filteredBooks = filteredBooks.filter((b) => !b.available);
+  }
+
+  /* ================= IMAGE ================= */
+  const getBookImage = (title) => {
+    const key = Object.keys(bookImages).find(
+      (k) => k.toLowerCase() === title?.trim().toLowerCase()
+    );
+
+    return key ? bookImages[key] : "/default.jpg";
   };
+
+  /* ================= LOADING ================= */
+  if (loading) {
+    return (
+      <div className="admin-container">
+        <h2>Loading Dashboard...</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-container">
 
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
       <div className="admin-header">
-        <h2>👑 Admin Dashboard</h2>
+        <h2>👑 Welcome {user?.name}</h2>
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
       </div>
 
-      {/* ================= STATS ================= */}
+      {/* STATS */}
       <div className="stats-container">
         <div className="stat-card">
           <h4>Total Books</h4>
@@ -158,22 +192,28 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* ================= SEARCH + FILTER ================= */}
+      {/* ================= NEW CHARTS (STEP 2) ================= */}
+      <h3>📊 Library Analytics</h3>
+      <DashboardCharts books={books} />
+
+      {/* SEARCH */}
       <input
         className="search-bar"
-        placeholder="🔍 Search books..."
+        placeholder="Search books..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <select onChange={(e) => setFilter(e.target.value)}>
+      {/* FILTER */}
+      <select value={filter} onChange={(e) => setFilter(e.target.value)}>
         <option value="all">All</option>
         <option value="available">Available</option>
         <option value="borrowed">Borrowed</option>
       </select>
 
-      {/* ================= ADD BOOK ================= */}
+      {/* ADD BOOK */}
       <h3>➕ Add Book</h3>
+
       <div className="add-book-form">
         <input
           placeholder="Title"
@@ -182,6 +222,7 @@ const AdminDashboard = () => {
             setNewBook({ ...newBook, title: e.target.value })
           }
         />
+
         <input
           placeholder="Author"
           value={newBook.author}
@@ -189,6 +230,7 @@ const AdminDashboard = () => {
             setNewBook({ ...newBook, author: e.target.value })
           }
         />
+
         <input
           placeholder="ISBN"
           value={newBook.isbn}
@@ -196,6 +238,7 @@ const AdminDashboard = () => {
             setNewBook({ ...newBook, isbn: e.target.value })
           }
         />
+
         <input
           placeholder="Genre"
           value={newBook.genre}
@@ -203,6 +246,7 @@ const AdminDashboard = () => {
             setNewBook({ ...newBook, genre: e.target.value })
           }
         />
+
         <input
           placeholder="Year"
           value={newBook.publicationYear}
@@ -214,72 +258,46 @@ const AdminDashboard = () => {
           }
         />
 
-        <button onClick={addBook}>Add Book</button>
+        <button onClick={addBook}>Add</button>
       </div>
 
-      {/* ================= BOOK LIST ================= */}
+      {/* BOOKS */}
       <h3>📚 All Books</h3>
 
       <div className="book-grid">
-        {filteredBooks.map((b) => (
+        {filteredBooks.map((book) => (
           <motion.div
-            key={b._id}
+            key={book._id}
             className="book-card"
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.04 }}
           >
             <img
-              src={bookImages[b.title] || "/default.jpg"}
-              alt={b.title}
+              src={getBookImage(book.title)}
+              alt={book.title}
               className="book-image"
-              onError={(e) => (e.target.src = "/default.jpg")}
+              onError={(e) => {
+                e.target.src = "/default.jpg";
+              }}
             />
 
-            <h4>{b.title}</h4>
-            <p>{b.author}</p>
-
+            <h4>{book.title}</h4>
+            <p>{book.author}</p>
             <p>
-              {b.available ? "🟢 Available" : "🔴 Borrowed"}
+              {book.available ? "🟢 Available" : "🔴 Borrowed"}
             </p>
 
-            <button onClick={() => setEditBook(b)}>
+            <button onClick={() => setEditBook(book)}>
               Edit
             </button>
 
-            <button onClick={() => deleteBook(b._id)}>
+            <button onClick={() => deleteBook(book._id)}>
               Delete
             </button>
           </motion.div>
         ))}
       </div>
 
-      {filteredBooks.length === 0 && <p>No books found 📭</p>}
-
-      {/* ================= EDIT POPUP ================= */}
-      {editBook && (
-        <div className="edit-popup">
-          <h3>Edit Book</h3>
-
-          <input
-            value={editBook.title}
-            onChange={(e) =>
-              setEditBook({ ...editBook, title: e.target.value })
-            }
-          />
-          <input
-            value={editBook.author}
-            onChange={(e) =>
-              setEditBook({ ...editBook, author: e.target.value })
-            }
-          />
-
-          <button onClick={updateBook}>Update</button>
-          <button onClick={() => setEditBook(null)}>
-            Cancel
-          </button>
-        </div>
-      )}
-
-      {/* ================= USERS ================= */}
+      {/* USERS */}
       <h3>👥 Users</h3>
 
       <div className="user-grid">
@@ -287,7 +305,7 @@ const AdminDashboard = () => {
           <motion.div
             key={u._id}
             className="user-card"
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.04 }}
           >
             <h4>{u.name}</h4>
             <p>{u.email}</p>

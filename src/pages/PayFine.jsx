@@ -1,100 +1,121 @@
 import { useEffect, useState } from "react";
 import axios from "../api/axios";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
+import { motion } from "framer-motion";
+import "../styles/payFine.css";
 
 const PayFine = () => {
-  const [borrows, setBorrows] = useState([]);
+  const { user } = useAuth();
+
+  const [dues, setDues] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 Fetch borrowed books
-  const fetchBorrows = async () => {
+  const authHeaders = () => ({
+    headers: {
+      Authorization: `Bearer ${user?.token}`,
+    },
+  });
+
+  /* ================= FETCH DUES ================= */
+  const fetchDues = async () => {
     try {
-      const res = await axios.get("/borrow/my-borrows");
-      setBorrows(res.data);
+      const res = await axios.get(
+        "/transactions/dues",
+        authHeaders()
+      );
+
+      setDues(res.data);
     } catch (error) {
-      alert("Error fetching borrows");
+      toast.error("Failed to fetch dues");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBorrows();
-  }, []);
+    if (user?.token) {
+      fetchDues();
+    }
+  }, [user]);
 
-  // 🔥 Calculate fine (₹10 per day)
-  const calculateFine = (dueDate) => {
-    const today = new Date();
-    const due = new Date(dueDate);
-
-    const diffTime = today - due;
-    const daysLate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    return daysLate > 0 ? daysLate * 10 : 0;
-  };
-
-  // 🔥 Handle payment
-  const handlePay = async (borrowId) => {
+  /* ================= PAY FINE ================= */
+  const handlePay = async (id) => {
     try {
-      // You can connect real backend later
-      alert("✅ Payment successful");
+      await axios.post(
+        `/transactions/pay-fine/${id}`,
+        {},
+        authHeaders()
+      );
 
-      // Optional: mark returned after payment
-      await axios.put(`/borrow/return/${borrowId}`);
-
-      fetchBorrows();
+      toast.success("Fine paid successfully");
+      fetchDues();
     } catch (error) {
-      alert("Payment failed");
+      toast.error("Payment failed");
     }
   };
 
-  if (loading) return <h2>Loading fines...</h2>;
+  const totalFine = dues.reduce(
+    (sum, item) => sum + item.fine,
+    0
+  );
+
+  if (loading) {
+    return (
+      <div className="fine-container">
+        <h2>Loading fines...</h2>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4">
-      <h2 style={{ marginBottom: "20px" }}>💰 Pay Fine</h2>
+    <div className="fine-container">
+      <h2 className="fine-title">
+        💳 Pay Library Fine
+      </h2>
 
-      {borrows.length === 0 ? (
-        <p>No borrowed books</p>
+      <div className="fine-summary">
+        Total Pending Fine: ₹{totalFine}
+      </div>
+
+      {dues.length === 0 ? (
+        <div className="no-fine">
+          🎉 No unpaid fines
+        </div>
       ) : (
         <div className="fine-grid">
-          {borrows.map((b) => {
-            const fine = calculateFine(b.dueDate);
-            const isLate = fine > 0;
+          {dues.map((item) => (
+            <motion.div
+              key={item._id}
+              className="fine-card"
+              whileHover={{
+                scale: 1.03,
+              }}
+            >
+              <h3>
+                {item.book?.title}
+              </h3>
 
-            return (
-              <div key={b._id} className="fine-card">
-                <h3>{b.book?.title}</h3>
-                <p>Author: {b.book?.author}</p>
+              <p>
+                {item.book?.author}
+              </p>
 
-                <p>
-                  Due Date:{" "}
-                  {new Date(b.dueDate).toDateString()}
-                </p>
+              <p>
+                Fine:
+                <strong>
+                  ₹{item.fine}
+                </strong>
+              </p>
 
-                {isLate ? (
-                  <>
-                    <p style={{ color: "red", fontWeight: "bold" }}>
-                      ⚠ Overdue
-                    </p>
-                    <p style={{ fontSize: "18px" }}>
-                      Fine: ₹{fine}
-                    </p>
-
-                    <button
-                      className="pay-btn"
-                      onClick={() => handlePay(b._id)}
-                    >
-                      Pay Now
-                    </button>
-                  </>
-                ) : (
-                  <p style={{ color: "green" }}>
-                    ✅ No Fine
-                  </p>
-                )}
-              </div>
-            );
-          })}
+              <button
+                onClick={() =>
+                  handlePay(item._id)
+                }
+              >
+                Pay Now
+              </button>
+            </motion.div>
+          ))}
         </div>
       )}
     </div>

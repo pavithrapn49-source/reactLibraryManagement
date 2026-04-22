@@ -1,13 +1,39 @@
 import API from "./axios";
 
-export const borrowBook = (bookId) =>
-  API.post("/borrow", { bookId });
+// ================= BORROW BOOK =================
+export const borrowBook = async (bookId) => {
+  const res = await API.post(`/transactions/borrow/${bookId}`);
+  return res.data;
+};
 
-export const returnBook = (borrowId) =>
-  API.put(`/borrow/return/${borrowId}`);
+// ================= RETURN BOOK =================
+export const returnBook = async (borrowId) => {
+  const res = await API.put(`/transactions/return/${borrowId}`);
+  return res.data;
+};
 
-export const getMyBorrows = () =>
-  API.get("/borrow/my");
+// ================= MY BORROWS =================
+export const getMyBorrows = async () => {
+  const res = await API.get("/transactions/my-borrows");
+  return res.data;
+};
 
-export const getAllBorrows = () =>
-  API.get("/borrow/all");
+// ================= HISTORY =================
+export const getHistory = async () => {
+  const res = await API.get("/transactions/history");
+  return res.data;
+};
+
+// ================= ALL BORROWS =================
+export const getAllBorrows = async () => {
+  const res = await API.get("/transactions");
+  return res.data;
+};
+
+export default {
+  borrowBook,
+  returnBook,
+  getMyBorrows,
+  getHistory,
+  getAllBorrows,
+};

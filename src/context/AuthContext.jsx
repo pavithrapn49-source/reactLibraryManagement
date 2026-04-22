@@ -1,41 +1,59 @@
-import { createContext, useContext, useState } from "react";
-import axios from "axios";
+import { createContext, useState, useEffect, useContext } from "react";
+import * as authApi from "../api/authApi";
 
-const AuthContext = createContext();
-
-const API = "https://library-management-backend-0un8.onrender.com";
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("user");
+
+    if (saved) {
+      setUser(JSON.parse(saved));
+    }
+
+    setAuthLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (user) localStorage.setItem("user", JSON.stringify(user));
+    else localStorage.removeItem("user");
+  }, [user]);
 
   const login = async (email, password) => {
-    const res = await axios.post(
-      `${API}/api/auth/login`,
-      { email, password }
-    );
+    const data = await authApi.login(email, password);
 
-    localStorage.setItem("token", res.data.token);
-    setUser(res.data.user);
+    const userData = {
+      ...data.user,
+      token: data.token,
+    };
 
-    return res.data.user;
+    setUser(userData);
+    return userData;
   };
 
   const register = async (name, email, password, role) => {
-    const res = await axios.post(
-      `${API}/api/auth/register`,
-      { name, email, password, role }
-    );
-
-    return res.data;
+    return await authApi.register(name, email, password, role);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
     setUser(null);
+    localStorage.removeItem("user");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        login,
+        register,
+        logout,
+        authLoading
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

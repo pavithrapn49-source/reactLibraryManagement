@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react";
-import axios from "../api/axios";
+import { getMyBorrows, returnBook } from "../api/borrowApi";
+import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 
 const MyBorrow = () => {
   const [borrows, setBorrows] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  /* ================= FETCH ================= */
   const fetchBorrows = async () => {
     try {
-      const res = await axios.get("/borrow/my-borrows");
-      setBorrows(res.data);
-    } catch (err) {
-      console.log(err);
+      const data = await getMyBorrows();
+      setBorrows(data || []);
+    } catch (error) {
+      toast.error(error.message || "Failed to fetch borrowed books");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -18,94 +23,100 @@ const MyBorrow = () => {
     fetchBorrows();
   }, []);
 
-  // 💰 Fine calculation (₹10 per day)
+  /* ================= FINE ================= */
   const calculateFine = (dueDate) => {
+    if (!dueDate) return 0;
+
     const today = new Date();
     const due = new Date(dueDate);
 
     if (today <= due) return 0;
 
-    const diffDays = Math.ceil((today - due) / (1000 * 60 * 60 * 24));
-    return diffDays * 10;
+    const lateDays = Math.ceil(
+      (today - due) / (1000 * 60 * 60 * 24)
+    );
+
+    return lateDays * 10;
   };
 
-  // 🔁 Return
+  /* ================= RETURN ================= */
   const handleReturn = async (id) => {
     try {
-      await axios.put(`/borrow/return/${id}`);
-      alert("Book returned!");
+      await returnBook(id);
+      toast.success("Book returned successfully");
       fetchBorrows();
-    } catch (err) {
-      alert("Error returning book");
+    } catch (error) {
+      toast.error(error.message || "Return failed");
     }
   };
 
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <h2>Loading borrowed books...</h2>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-container">
-      <h2>📖 My Borrowed Books</h2>
+      <h2 className="text-2xl font-bold mb-6">
+        📚 My Borrowed Books
+      </h2>
 
-      {/* 📭 EMPTY */}
-      {borrows.length === 0 && (
-        <p style={{ marginTop: "20px" }}>No borrowed books 📭</p>
-      )}
+      {borrows.length === 0 ? (
+        <p>No borrowed books 📭</p>
+      ) : (
+        <div className="book-grid">
+          {borrows.map((item) => {
+            const dueDate = new Date(item.dueDate);
+            const today = new Date();
 
-      {/* 📚 GRID */}
-      <div className="book-grid">
-        {borrows.map((b) => {
-          const due = new Date(b.dueDate);
-          const today = new Date();
+            const daysLeft = Math.ceil(
+              (dueDate - today) / (1000 * 60 * 60 * 24)
+            );
 
-          const isLate = today > due;
-          const fine = calculateFine(b.dueDate);
+            const fine = calculateFine(item.dueDate);
 
-          const daysLeft = Math.ceil(
-            (due - today) / (1000 * 60 * 60 * 24)
-          );
-
-          return (
-            <motion.div
-              key={b._id}
-              className="book-card"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <h3>{b.book?.title}</h3>
-              <p>{b.book?.author}</p>
-
-              <p>
-                📅 Due: {due.toDateString()}
-              </p>
-
-              {/* ⏳ STATUS */}
-              {!isLate ? (
-                <p style={{ color: "green" }}>
-                  ⏳ {daysLeft} days left
-                </p>
-              ) : (
-                <p style={{ color: "red" }}>
-                  ⚠ Overdue by {Math.abs(daysLeft)} days
-                </p>
-              )}
-
-              {/* 💰 FINE */}
-              {fine > 0 && (
-                <p style={{ color: "orange", fontWeight: "bold" }}>
-                  💰 Fine: ₹{fine}
-                </p>
-              )}
-
-              {/* 🔘 RETURN */}
-              <button
-                className="return-btn"
-                onClick={() => handleReturn(b._id)}
+            return (
+              <motion.div
+                key={item._id}
+                className="book-card"
+                whileHover={{ scale: 1.03 }}
               >
-                Return Book
-              </button>
-            </motion.div>
-          );
-        })}
-      </div>
+                <h3>{item.book?.title || "Unknown Book"}</h3>
+                <p>{item.book?.author}</p>
+
+                <p>
+                  Due Date: {dueDate.toDateString()}
+                </p>
+
+                {fine > 0 ? (
+                  <>
+                    <p style={{ color: "red" }}>
+                      Overdue by {Math.abs(daysLeft)} days
+                    </p>
+                    <p style={{ color: "orange" }}>
+                      Fine: ₹{fine}
+                    </p>
+                  </>
+                ) : (
+                  <p style={{ color: "green" }}>
+                    {daysLeft} days left
+                  </p>
+                )}
+
+                <button
+                  className="return-btn"
+                  onClick={() => handleReturn(item._id)}
+                >
+                  Return Book
+                </button>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

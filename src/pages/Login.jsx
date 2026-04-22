@@ -1,93 +1,107 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 import "../styles/login.css";
-
-
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState("");       // starts empty
-  const [password, setPassword] = useState(""); // starts empty
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  /* ================= LOGIN ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!email || !password) {
-      alert("Please enter both email and password");
+      toast.error("Please enter email and password");
       return;
     }
 
-    setLoading(true);
     try {
-      const user = await login(email, password);
+      setLoading(true);
 
-      // Redirect based on role
-      if (user.role === "admin") navigate("/admin");
-      else if (user.role === "librarian") navigate("/librarian");
-      else navigate("/member");
+      const data = await login(email, password);
 
-    } 
-    
-    
-    catch (error) {
-      alert(error.response?.data?.message || error.message || "Login failed");
+      toast.success(`Welcome ${data.name}`);
+      navigate("/dashboard");
+
+    } catch (error) {
+      toast.error(error.message || "Login failed");
     } finally {
       setLoading(false);
     }
-
   };
 
   return (
-    <div className="login-container">
+    <div className="login-page">
+
       <div className="login-card">
-      <h2>Welcome Back 👋</h2>
-      <p className="subtitle">Login to your account</p>
 
+        <h1 className="login-title">📚 Library Login</h1>
+        <p className="login-subtitle">
+          Access your futuristic digital library
+        </p>
 
-      <form onSubmit={handleSubmit} autoComplete="off">
+        {/* Hidden fake fields to stop autofill */}
         <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          autoComplete="off"
+          type="text"
+          name="fakeusernameremembered"
+          style={{ display: "none" }}
         />
-
         <input
           type="password"
-          placeholder="Enter your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          autoComplete="new-password"
+          name="fakepasswordremembered"
+          style={{ display: "none" }}
         />
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
-
-      <p style={{ marginTop: "1rem" }}>
-        Don't have an account?{" "}
-        <button
-          style={{
-            background: "none",
-            border: "none",
-            color: "blue",
-            cursor: "pointer",
-            textDecoration: "underline",
-            padding: 0,
-            font: "inherit"
-          }}
-          onClick={() => navigate("/register")}
+        <form
+          onSubmit={handleSubmit}
+          autoComplete="off"
+          className="login-form"
         >
-          Register here
-        </button>
-      </p>
+          <input
+            type="email"
+            name="library_user_email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="off"
+            className="login-input"
+          />
+
+          <input
+            type="password"
+            name="library_user_passcode"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+            className="login-input"
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="login-btn"
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+
+        <p className="register-text">
+          Don't have an account?
+          <span
+            className="register-link"
+            onClick={() => navigate("/register")}
+          >
+            Register Here
+          </span>
+        </p>
+
       </div>
     </div>
   );
