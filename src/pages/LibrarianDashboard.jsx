@@ -63,7 +63,7 @@ const LibrarianDashboard = () => {
   /* ================= FETCH ================= */
   const fetchBooks = async () => {
     const res = await axios.get("/books", authHeaders());
-    setBooks(res.data);
+    setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
   };
 
   const loadDashboard = async () => {

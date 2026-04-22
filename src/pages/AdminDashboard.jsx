@@ -53,12 +53,12 @@ const AdminDashboard = () => {
   /* ================= FETCH ================= */
   const fetchBooks = async () => {
     const res = await axios.get("/books", authHeaders());
-    setBooks(res.data);
+    setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
   };
 
   const fetchUsers = async () => {
     const res = await axios.get("/users", authHeaders());
-    setUsers(res.data);
+    setUsers(Array.isArray(res.data) ? res.data : res.data.users || []);
   };
 
   const loadDashboard = async () => {

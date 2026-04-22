@@ -59,7 +59,7 @@ const MemberDashboard = () => {
   /* ================= FETCH ================= */
   const fetchBooks = async () => {
     const res = await axios.get("/books", authHeaders());
-    setBooks(res.data);
+  setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
   };
 
   const fetchMyBorrows = async () => {
@@ -67,7 +67,7 @@ const MemberDashboard = () => {
       "/transactions/my-borrows",
       authHeaders()
     );
-    setMyBorrows(res.data);
+    setMyBorrows(Array.isArray(res.data) ? res.data : res.data.borrows || []);
   };
 
   const fetchHistory = async () => {
@@ -75,7 +75,7 @@ const MemberDashboard = () => {
       "/transactions/history",
       authHeaders()
     );
-    setHistory(res.data);
+    setHistory(Array.isArray(res.data) ? res.data : res.data.history || []);
   };
 
   const loadDashboard = async () => {
