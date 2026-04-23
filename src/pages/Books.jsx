@@ -17,6 +17,15 @@ const bookImages = {
   "Little Ones": "/little ones.jpg",
 };
 
+/* ================= IMAGE HELPER ================= */
+const getBookImage = (title) => {
+  const key = Object.keys(bookImages).find(
+    (k) => k.toLowerCase() === (title || "").trim().toLowerCase()
+  );
+
+  return key ? bookImages[key] : "/default.jpg";
+};
+
 const Books = () => {
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
@@ -26,11 +35,22 @@ const Books = () => {
 
   const { user } = useAuth();
 
-  /* ================= FETCH BOOKS ================= */
+  const authHeaders = () => ({
+    headers: {
+      Authorization: `Bearer ${user?.token}`,
+    },
+  });
+
+  /* ================= FETCH BOOKS (FIXED) ================= */
   const fetchBooks = async () => {
     try {
-      const data = await getBooks();
-      setBooks(Array.isArray(data) ? data : []);
+      const res = await getBooks();
+
+      // ✅ FIX: handle all API formats safely
+      const booksData =
+        res?.books || res?.data?.books || res?.data || [];
+
+      setBooks(Array.isArray(booksData) ? booksData : []);
     } catch (err) {
       toast.error(err.message || "Failed to fetch books");
       setBooks([]);
@@ -41,20 +61,9 @@ const Books = () => {
     fetchBooks();
   }, []);
 
-  /* ================= IMAGE HANDLER ================= */
-  const getBookImage = (title) => {
-    const cleanTitle = (title || "").trim().toLowerCase();
-
-    const matchedKey = Object.keys(bookImages).find(
-      (key) => key.toLowerCase() === cleanTitle
-    );
-
-    return matchedKey ? bookImages[matchedKey] : "/default.jpg";
-  };
-
-  /* ================= FILTER + SORT (OPTIMIZED) ================= */
+  /* ================= FILTER + SORT ================= */
   const filteredBooks = useMemo(() => {
-    let result = [...books];
+    let result = [...(books || [])];
 
     // SEARCH
     result = result.filter((book) =>
@@ -144,7 +153,7 @@ const Books = () => {
           <motion.div
             key={book._id}
             className="book-card"
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.05 }}
           >
@@ -164,7 +173,7 @@ const Books = () => {
               {book.available ? "🟢 Available" : "🔴 Borrowed"}
             </p>
 
-            {/* ACTION BUTTONS */}
+            {/* ACTIONS */}
             {book.available ? (
               <button
                 disabled={loadingId === book._id}
@@ -173,14 +182,12 @@ const Books = () => {
                 {loadingId === book._id ? "Loading..." : "Borrow"}
               </button>
             ) : (
-              !book.reserved && (
-                <button
-                  disabled={loadingId === book._id}
-                  onClick={() => handleReserve(book._id)}
-                >
-                  {loadingId === book._id ? "Loading..." : "Reserve"}
-                </button>
-              )
+              <button
+                disabled={loadingId === book._id}
+                onClick={() => handleReserve(book._id)}
+              >
+                {loadingId === book._id ? "Loading..." : "Reserve"}
+              </button>
             )}
           </motion.div>
         ))}
