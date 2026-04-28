@@ -120,7 +120,7 @@ select{
 }
 
 select:focus{
-  outline:none;
+  outline:blueviolet;
 }
 
 /* TITLES */
@@ -222,7 +222,7 @@ h3{
   padding:12px;
   border:none;
   border-radius:12px;
-  color:white;
+  color:rgb(97, 4, 43);
   font-weight:600;
   cursor:pointer;
   transition:.3s;
@@ -241,43 +241,76 @@ h3{
 .user-card button:hover{
   transform:scale(1.02);
 }
+/* ================= FIX EDIT POPUP ================= */
 
-/* EDIT POPUP */
 .edit-popup{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:90%;
-  max-width:420px;
-  background:white;
-  padding:25px;
-  border-radius:20px;
-  box-shadow:0 25px 40px rgba(0,0,0,.2);
-  z-index:999;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 420px;
+  background: #ffffff;              /* changed */
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 25px 40px rgba(0,0,0,.25);
+  z-index: 999;
 }
 
+/* heading visible */
 .edit-popup h3{
-  margin-top:0;
+  margin-top: 0;
+  margin-bottom: 18px;
+  color: #111827;
+  font-size: 24px;
 }
 
+/* inputs visible */
 .edit-popup input{
-  width:100%;
-  padding:13px 15px;
-  margin-bottom:12px;
-  border:none;
-  border-radius:12px;
-  background:#f8fafc;
+  width: 100%;
+  padding: 13px 15px;
+  margin-bottom: 12px;
+  border: 1px solid #010d1d;
+  border-radius: 12px;
+  background: #f8fafc;             /* light background */
+  color: #111827;                  /* dark text */
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+/* placeholder visible */
+.edit-popup input::placeholder{
+  color: #64748b;
+}
+
+/* cursor + typing visible */
+.edit-popup input:focus{
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+  background: #240238;
+  color: #111827;
+}
+
+/* buttons */
+.edit-popup button{
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  color: rgb(230, 7, 7);
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .edit-popup button:first-of-type{
-  background:linear-gradient(135deg,#10b981,#059669);
+  background: linear-gradient(135deg,#10b981,#059669);
 }
 
 .edit-popup button:last-of-type{
-  background:linear-gradient(135deg,#64748b,#475569);
+  background: linear-gradient(135deg,#64748b,#475569);
 }
-
 /* SCROLLBAR */
 ::-webkit-scrollbar{
   width:8px;

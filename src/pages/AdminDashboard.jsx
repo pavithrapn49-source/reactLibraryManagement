@@ -425,67 +425,73 @@ const AdminDashboard = () => {
       </div>
 
       {/* EDIT BOOK */}
-      {editBook && (
-        <div className="edit-modal">
-          <div className="edit-box">
-            <h3>Edit Book</h3>
+{editBook && (
+  <div className="edit-modal">
+    <div className="edit-box">
+      <h3>✏️ Edit Book</h3>
 
-            <input
-              value={editBook.title}
-              onChange={(e) =>
-                setEditBook({
-                  ...editBook,
-                  title:
-                    e.target.value,
-                })
-              }
-            />
+      <input
+        type="text"
+        placeholder="Book Title"
+        value={editBook.title || ""}
+        onChange={(e) =>
+          setEditBook({
+            ...editBook,
+            title: e.target.value,
+          })
+        }
+      />
 
-            <input
-              value={editBook.author}
-              onChange={(e) =>
-                setEditBook({
-                  ...editBook,
-                  author:
-                    e.target.value,
-                })
-              }
-            />
+      <input
+        type="text"
+        placeholder="Author Name"
+        value={editBook.author || ""}
+        onChange={(e) =>
+          setEditBook({
+            ...editBook,
+            author: e.target.value,
+          })
+        }
+      />
 
-            <input
-              value={editBook.genre}
-              onChange={(e) =>
-                setEditBook({
-                  ...editBook,
-                  genre:
-                    e.target.value,
-                })
-              }
-            />
+      <input
+        type="text"
+        placeholder="Genre"
+        value={editBook.genre || ""}
+        onChange={(e) =>
+          setEditBook({
+            ...editBook,
+            genre: e.target.value,
+          })
+        }
+      />
 
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                marginTop: "10px",
-              }}
-            >
-              <button onClick={updateBook}>
-                Save
-              </button>
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginTop: "14px",
+        }}
+      >
+        <button
+          className="save-btn"
+          onClick={updateBook}
+        >
+          Save
+        </button>
 
-              <button
-                onClick={() =>
-                  setEditBook(null)
-                }
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+        <button
+          className="cancel-btn"
+          onClick={() =>
+            setEditBook(null)
+          }
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       {/* USERS */}
       <h3>👥 Users</h3>
 
