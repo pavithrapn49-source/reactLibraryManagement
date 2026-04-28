@@ -45,11 +45,54 @@ src/
 ├── services/      - API services
 ├── styles/        - CSS files
 └── App.js         - Main App component
-```
 
-## Contributing
+  ## Live Demo
 
-Contributions are welcome! Please feel free to submit a pull request.
+            Frontend:  https://react-library-management-gzi1.vercel.app
+            Backend:   https://library-management-backend-0un8.onrender.com/api
+            
+
+## Demo Credentials
+
+    ### Admin
+
+            Email: [admin@test.com](mailto:admin@test.com)
+            Password: Admin123
+
+    ### Member
+
+            Email: [member@test.com](mailto:member@test.com)
+            Password: Member123
+
+    ## Features
+
+   ## Member
+
+        * Register / Login
+        * Browse books
+        * Search books
+        * Borrow available books
+        * Reserve unavailable books
+        * Return books
+        * Fine payment
+        * View borrow history
+
+    ### Admin
+
+        * Add / Edit / Delete books
+        * View all users
+        * View borrow records
+        * Approve reservations
+        * Dashboard analytics
+
+    ## Borrow vs Reserve
+
+        **Borrow:** If a book is available, user can take it immediately.
+        **Reserve:** If book is already borrowed, user can queue for it.
+
+    ## Contributing
+
+    Contributions are welcome! Please feel free to submit a pull request.
 
 ## License
 

@@ -37,6 +37,7 @@
 
   background:linear-gradient(90deg,#00eaff,#8b5cf6,#00ffa3);
   background-size:200% auto;
+  background-clip:text;
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   animation:logoGlow 5s linear infinite;

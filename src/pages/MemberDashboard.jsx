@@ -13,7 +13,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-/* ================= BOOK IMAGES ================= */
 const bookImages = {
   "React Guide": "/react guide.jpg",
   "Geographical Tales": "/geo tales.jpg",
@@ -33,6 +32,9 @@ const MemberDashboard = () => {
   const [books, setBooks] = useState([]);
   const [myBorrows, setMyBorrows] = useState([]);
   const [history, setHistory] = useState([]);
+  const [dues, setDues] = useState([]);
+  const [reservedBooks, setReservedBooks] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   const authHeaders = () => ({
@@ -50,7 +52,9 @@ const MemberDashboard = () => {
   /* ================= IMAGE ================= */
   const getBookImage = (title) => {
     const key = Object.keys(bookImages).find(
-      (k) => k.toLowerCase() === title?.trim().toLowerCase()
+      (k) =>
+        k.toLowerCase() ===
+        title?.trim().toLowerCase()
     );
 
     return key ? bookImages[key] : "/default.jpg";
@@ -58,8 +62,16 @@ const MemberDashboard = () => {
 
   /* ================= FETCH ================= */
   const fetchBooks = async () => {
-    const res = await axios.get("/books", authHeaders());
-  setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
+    const res = await axios.get(
+      "/books",
+      authHeaders()
+    );
+
+    setBooks(
+      Array.isArray(res.data)
+        ? res.data
+        : res.data.books || []
+    );
   };
 
   const fetchMyBorrows = async () => {
@@ -67,7 +79,12 @@ const MemberDashboard = () => {
       "/transactions/my-borrows",
       authHeaders()
     );
-    setMyBorrows(Array.isArray(res.data) ? res.data : res.data.borrows || []);
+
+    setMyBorrows(
+      Array.isArray(res.data)
+        ? res.data
+        : res.data.borrows || []
+    );
   };
 
   const fetchHistory = async () => {
@@ -75,7 +92,38 @@ const MemberDashboard = () => {
       "/transactions/history",
       authHeaders()
     );
-    setHistory(Array.isArray(res.data) ? res.data : res.data.history || []);
+
+    setHistory(
+      Array.isArray(res.data)
+        ? res.data
+        : res.data.history || []
+    );
+  };
+
+  const fetchDues = async () => {
+    const res = await axios.get(
+      "/transactions/dues",
+      authHeaders()
+    );
+
+    setDues(
+      Array.isArray(res.data)
+        ? res.data
+        : res.data.dues || []
+    );
+  };
+
+  const fetchReservedBooks = async () => {
+    const res = await axios.get(
+      "/books/reserved/my",
+      authHeaders()
+    );
+
+    setReservedBooks(
+      Array.isArray(res.data)
+        ? res.data
+        : res.data.books || []
+    );
   };
 
   const loadDashboard = async () => {
@@ -86,17 +134,23 @@ const MemberDashboard = () => {
         fetchBooks(),
         fetchMyBorrows(),
         fetchHistory(),
+        fetchDues(),
+        fetchReservedBooks(),
       ]);
     } catch {
-      toast.error("Failed to load dashboard");
+      toast.error(
+        "Failed to load dashboard"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user?.token) loadDashboard();
-  }, [user]);
+    if (user?.token) {
+      loadDashboard();
+    }
+  }, [user?.token]);
 
   /* ================= ACTIONS ================= */
   const borrowBook = async (id) => {
@@ -107,10 +161,17 @@ const MemberDashboard = () => {
         authHeaders()
       );
 
-      toast.success("Book borrowed!");
+      toast.success(
+        "Book borrowed successfully"
+      );
+
       loadDashboard();
-    } catch {
-      toast.error("Borrow failed");
+    } catch (error) {
+      toast.error(
+        error?.response?.data
+          ?.message ||
+          "Borrow failed"
+      );
     }
   };
 
@@ -122,9 +183,17 @@ const MemberDashboard = () => {
         authHeaders()
       );
 
-      toast.success("Book reserved!");
-    } catch {
-      toast.error("Reserve failed");
+      toast.success(
+        "Book reserved successfully"
+      );
+
+      loadDashboard();
+    } catch (error) {
+      toast.error(
+        error?.response?.data
+          ?.message ||
+          "Reserve failed"
+      );
     }
   };
 
@@ -136,12 +205,78 @@ const MemberDashboard = () => {
         authHeaders()
       );
 
-      toast.success("Book returned!");
+      toast.success(
+        "Book returned successfully"
+      );
+
       loadDashboard();
-    } catch {
-      toast.error("Return failed");
+    } catch (error) {
+      toast.error(
+        error?.response?.data
+          ?.message ||
+          "Return failed"
+      );
     }
   };
+
+  const renewBook = async (id) => {
+    try {
+      await axios.post(
+        `/transactions/renew/${id}`,
+        {},
+        authHeaders()
+      );
+
+      toast.success(
+        "Book renewed successfully"
+      );
+
+      loadDashboard();
+    } catch (error) {
+      toast.error(
+        error?.response?.data
+          ?.message ||
+          "Renew failed"
+      );
+    }
+  };
+
+  const payFine = async (id) => {
+    try {
+      await axios.post(
+        `/transactions/pay-fine/${id}`,
+        {},
+        authHeaders()
+      );
+
+      toast.success(
+        "Fine paid successfully"
+      );
+
+      loadDashboard();
+    } catch (error) {
+      toast.error(
+        error?.response?.data
+          ?.message ||
+          "Payment failed"
+      );
+    }
+  };
+
+  /* ================= FILTER ================= */
+  const filteredBooks = books.filter(
+    (book) =>
+      book.title
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        ) ||
+      book.author
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+  );
 
   /* ================= ANALYTICS ================= */
   const chartData = [
@@ -151,25 +286,39 @@ const MemberDashboard = () => {
     },
     {
       name: "Returned",
-      value: history.filter((h) => h.returned).length,
+      value: history.filter(
+        (h) =>
+          h.status === "returned"
+      ).length,
     },
     {
       name: "Available",
-      value: books.filter((b) => b.available).length,
+      value: books.filter(
+        (b) => b.available
+      ).length,
     },
   ];
+
+  const totalFine = dues.reduce(
+    (sum, item) =>
+      sum + (item.fine || 0),
+    0
+  );
 
   /* ================= LOADING ================= */
   if (loading) {
     return (
       <div className="dashboard-container">
-        <h2>Loading Dashboard...</h2>
+        <h2>
+          Loading Dashboard...
+        </h2>
       </div>
     );
   }
 
   return (
     <div className="dashboard-layout">
+
       {/* SIDEBAR */}
       <div className="sidebar">
         <h2>📚 Library</h2>
@@ -178,7 +327,8 @@ const MemberDashboard = () => {
           onClick={() =>
             window.scrollTo({
               top: 0,
-              behavior: "smooth",
+              behavior:
+                "smooth",
             })
           }
         >
@@ -188,9 +338,12 @@ const MemberDashboard = () => {
         <button
           onClick={() =>
             document
-              .getElementById("my-borrows")
+              .getElementById(
+                "my-borrows"
+              )
               ?.scrollIntoView({
-                behavior: "smooth",
+                behavior:
+                  "smooth",
               })
           }
         >
@@ -200,9 +353,12 @@ const MemberDashboard = () => {
         <button
           onClick={() =>
             document
-              .getElementById("history")
+              .getElementById(
+                "history"
+              )
               ?.scrollIntoView({
-                behavior: "smooth",
+                behavior:
+                  "smooth",
               })
           }
         >
@@ -210,8 +366,25 @@ const MemberDashboard = () => {
         </button>
 
         <button
+          onClick={() =>
+            document
+              .getElementById(
+                "dues"
+              )
+              ?.scrollIntoView({
+                behavior:
+                  "smooth",
+              })
+          }
+        >
+          Fines
+        </button>
+
+        <button
           className="logout-btn"
-          onClick={handleLogout}
+          onClick={
+            handleLogout
+          }
         >
           Logout
         </button>
@@ -219,56 +392,120 @@ const MemberDashboard = () => {
 
       {/* MAIN */}
       <div className="dashboard-container">
-        <h2>👋 Welcome {user?.name}</h2>
+
+        <h2>
+          👋 Welcome{" "}
+          {user?.name}
+        </h2>
+
+        {/* SEARCH */}
+        <input
+          className="search-bar"
+          placeholder="Search books..."
+          value={search}
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )
+          }
+        />
 
         {/* STATS */}
         <div className="stats-container">
+
           <div className="stat-card">
-            <h4>Available Books</h4>
+            <h4>
+              Available
+            </h4>
             <p>
               {
-                books.filter((b) => b.available)
-                  .length
+                books.filter(
+                  (b) =>
+                    b.available
+                ).length
               }
             </p>
           </div>
 
           <div className="stat-card">
-            <h4>My Borrowed</h4>
-            <p>{myBorrows.length}</p>
+            <h4>
+              Borrowed
+            </h4>
+            <p>
+              {
+                myBorrows.length
+              }
+            </p>
           </div>
 
           <div className="stat-card">
-            <h4>History</h4>
-            <p>{history.length}</p>
+            <h4>
+              Reserved
+            </h4>
+            <p>
+              {
+                reservedBooks.length
+              }
+            </p>
           </div>
+
+          <div className="stat-card">
+            <h4>
+              Fine
+            </h4>
+            <p>
+              ₹
+              {totalFine}
+            </p>
+          </div>
+
         </div>
 
         {/* CHART */}
-        <h3>📊 My Analytics</h3>
+        <h3>
+          📊 My Analytics
+        </h3>
 
-        <div className="stat-card" style={{ height: "320px" }}>
+        <div
+          className="stat-card"
+          style={{
+            height:
+              "320px",
+          }}
+        >
           <ResponsiveContainer
             width="100%"
             height="100%"
           >
             <PieChart>
               <Pie
-                data={chartData}
+                data={
+                  chartData
+                }
                 dataKey="value"
-                outerRadius={110}
+                outerRadius={
+                  110
+                }
                 label
               >
-                {chartData.map((entry, index) => (
-                  <Cell
-                    key={index}
-                    fill={
-                      COLORS[
-                        index % COLORS.length
-                      ]
-                    }
-                  />
-                ))}
+                {chartData.map(
+                  (
+                    entry,
+                    index
+                  ) => (
+                    <Cell
+                      key={
+                        index
+                      }
+                      fill={
+                        COLORS[
+                          index %
+                            COLORS.length
+                        ]
+                      }
+                    />
+                  )
+                )}
               </Pie>
 
               <Tooltip />
@@ -277,153 +514,323 @@ const MemberDashboard = () => {
         </div>
 
         {/* BOOKS */}
-        <h3>📚 Books</h3>
+        <h3>
+          📚 Books
+        </h3>
 
         <div className="book-grid">
-          {books.map((book) => (
-            <motion.div
-              key={book._id}
-              className="book-card"
-              whileHover={{
-                scale: 1.03,
-              }}
-            >
-              <img
-                src={getBookImage(book.title)}
-                alt={book.title}
-                className="book-image"
-                onError={(e) => {
-                  e.target.src =
-                    "/default.jpg";
+          {filteredBooks.map(
+            (book) => (
+              <motion.div
+                key={
+                  book._id
+                }
+                className="book-card"
+                whileHover={{
+                  scale:
+                    1.03,
                 }}
-              />
-
-              <h4>{book.title}</h4>
-              <p>{book.author}</p>
-
-              <p>
-                {book.available
-                  ? "🟢 Available"
-                  : "🔴 Borrowed"}
-              </p>
-
-              {book.available ? (
-                <button
-                  className="borrow-btn"
-                  onClick={() =>
-                    borrowBook(book._id)
+              >
+                <img
+                  src={getBookImage(
+                    book.title
+                  )}
+                  alt={
+                    book.title
                   }
-                >
-                  Borrow
-                </button>
-              ) : (
-                <button
-                  className="reserve-btn"
-                  onClick={() =>
-                    reserveBook(book._id)
+                  className="book-image"
+                  onError={(
+                    e
+                  ) =>
+                    (e.target.src =
+                      "/default.jpg")
                   }
-                >
-                  Reserve
-                </button>
-              )}
-            </motion.div>
-          ))}
+                />
+
+                <h4>
+                  {
+                    book.title
+                  }
+                </h4>
+
+                <p>
+                  {
+                    book.author
+                  }
+                </p>
+
+                <p>
+                  {
+                    book.genre
+                  }
+                </p>
+
+                <p>
+                  {book.available
+                    ? "🟢 Available"
+                    : "🔴 Borrowed"}
+                </p>
+
+                {book.available ? (
+                  <button
+                    className="borrow-btn"
+                    onClick={() =>
+                      borrowBook(
+                        book._id
+                      )
+                    }
+                  >
+                    Borrow
+                  </button>
+                ) : (
+                  <button
+                    className="reserve-btn"
+                    onClick={() =>
+                      reserveBook(
+                        book._id
+                      )
+                    }
+                  >
+                    Reserve
+                  </button>
+                )}
+              </motion.div>
+            )
+          )}
         </div>
 
         {/* MY BORROWS */}
         <h3 id="my-borrows">
-          📦 My Borrowed Books
+          📦 My Borrowed
+          Books
         </h3>
 
         <div className="book-grid">
-          {myBorrows.map((item) => {
-            const isLate =
-              new Date() >
-              new Date(item.dueDate);
+          {myBorrows.length ===
+            0 && (
+            <p>
+              No borrowed
+              books
+            </p>
+          )}
 
-            return (
-              <motion.div
-                key={item._id}
-                className="book-card"
-                whileHover={{
-                  scale: 1.03,
-                }}
-              >
-                <h4>
-                  {item.book?.title}
-                </h4>
+          {myBorrows.map(
+            (item) => {
+              const isLate =
+                new Date() >
+                new Date(
+                  item.dueDate
+                );
 
-                <p>
-                  {item.book?.author}
-                </p>
-
-                <p>
-                  Due:{" "}
-                  {new Date(
-                    item.dueDate
-                  ).toDateString()}
-                </p>
-
-                <p
-                  style={{
-                    color: isLate
-                      ? "red"
-                      : "green",
-                    fontWeight: "600",
-                  }}
-                >
-                  {isLate
-                    ? "⚠ Overdue"
-                    : "On Time"}
-                </p>
-
-                <button
-                  className="return-btn"
-                  onClick={() =>
-                    returnBook(
-                      item._id
-                    )
+              return (
+                <div
+                  key={
+                    item._id
                   }
+                  className="book-card"
                 >
-                  Return
-                </button>
-              </motion.div>
-            );
-          })}
+                  <h4>
+                    {
+                      item
+                        .book
+                        ?.title
+                    }
+                  </h4>
+
+                  <p>
+                    {
+                      item
+                        .book
+                        ?.author
+                    }
+                  </p>
+
+                  <p>
+                    Due:{" "}
+                    {new Date(
+                      item.dueDate
+                    ).toDateString()}
+                  </p>
+
+                  <p>
+                    {isLate
+                      ? "⚠ Overdue"
+                      : "✅ On Time"}
+                  </p>
+
+                  <button
+                    className="borrow-btn"
+                    onClick={() =>
+                      renewBook(
+                        item._id
+                      )
+                    }
+                  >
+                    Renew
+                  </button>
+
+                  <button
+                    className="return-btn"
+                    onClick={() =>
+                      returnBook(
+                        item._id
+                      )
+                    }
+                  >
+                    Return
+                  </button>
+                </div>
+              );
+            }
+          )}
+        </div>
+
+        {/* RESERVED */}
+        <h3>
+          📌 Reserved
+          Books
+        </h3>
+
+        <div className="book-grid">
+          {reservedBooks.length ===
+            0 ? (
+            <p>
+              No reserved
+              books
+            </p>
+          ) : (
+            reservedBooks.map(
+              (
+                book
+              ) => (
+                <div
+                  key={
+                    book._id
+                  }
+                  className="book-card"
+                >
+                  <h4>
+                    {
+                      book.title
+                    }
+                  </h4>
+                  <p>
+                    {
+                      book.author
+                    }
+                  </p>
+                  <p>
+                    Reserved
+                  </p>
+                </div>
+              )
+            )
+          )}
         </div>
 
         {/* HISTORY */}
         <h3 id="history">
-          📜 Borrow History
+          📜 Borrow
+          History
         </h3>
 
         <div className="book-grid">
-          {history.map((item) => (
-            <div
-              key={item._id}
-              className="book-card"
-            >
-              <h4>
-                {item.book?.title}
-              </h4>
+          {history.map(
+            (item) => (
+              <div
+                key={
+                  item._id
+                }
+                className="book-card"
+              >
+                <h4>
+                  {
+                    item
+                      .book
+                      ?.title
+                  }
+                </h4>
 
-              <p>
-                {item.book?.author}
-              </p>
+                <p>
+                  {
+                    item
+                      .book
+                      ?.author
+                  }
+                </p>
 
-              <p>
-                {item.returned
-                  ? "Returned"
-                  : "Borrowed"}
-              </p>
+                <p>
+                  {item.status ===
+                  "returned"
+                    ? "✅ Returned"
+                    : "📚 Borrowed"}
+                </p>
 
-              <p>
-                Fine ₹
-                {item.fine || 0}
-              </p>
-            </div>
-          ))}
+                <p>
+                  Fine ₹
+                  {item.fine ||
+                    0}
+                </p>
+              </div>
+            )
+          )}
         </div>
+
+        {/* DUES */}
+        <h3 id="dues">
+          💳 Pending
+          Fines
+        </h3>
+
+        <div className="book-grid">
+          {dues.length ===
+            0 ? (
+            <p>
+              No pending
+              fines
+            </p>
+          ) : (
+            dues.map(
+              (
+                item
+              ) => (
+                <div
+                  key={
+                    item._id
+                  }
+                  className="book-card"
+                >
+                  <h4>
+                    {
+                      item
+                        .book
+                        ?.title
+                    }
+                  </h4>
+
+                  <p>
+                    ₹
+                    {
+                      item.fine
+                    }
+                  </p>
+
+                  <button
+                    className="borrow-btn"
+                    onClick={() =>
+                      payFine(
+                        item._id
+                      )
+                    }
+                  >
+                    Pay Fine
+                  </button>
+                </div>
+              )
+            )
+          )}
+        </div>
+
       </div>
     </div>
   );
