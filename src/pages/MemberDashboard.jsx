@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import axios from "../api/axios";
+
 import "../styles/memberDashboard.css";
+
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+
 import { toast } from "react-toastify";
+
 import {
   PieChart,
   Pie,
@@ -13,394 +14,450 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const bookImages = {
-  "React Guide": "/react guide.jpg",
-  "Geographical Tales": "/geo tales.jpg",
-  "Harry Potter": "/harry potter.jpg",
-  "Java Guide": "/java.jpg",
-  "Children's Tales": "/childrens tales.jpg",
-  "Lessons of Maths": "/maths.jpg",
-  "Little Ones": "/little ones.jpg",
-};
+import {
+  getBooks,
+  getReservedForMe,
+} from "../api/bookApi";
 
-const COLORS = ["#22c55e", "#ef4444", "#3b82f6"];
+import {
+  getMyBorrows,
+  getMyHistory,
+  getMyReservedBooks,
+  getMyReturnedBooks,
+} from "../api/borrowApi";
+
+const COLORS = [
+  "#22c55e",
+  "#ef4444",
+  "#3b82f6",
+];
 
 const MemberDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const [books, setBooks] = useState([]);
-  const [myBorrows, setMyBorrows] = useState([]);
-  const [history, setHistory] = useState([]);
-  const [dues, setDues] = useState([]);
-  const [reservedBooks, setReservedBooks] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [books, setBooks] =
+    useState([]);
 
-  const authHeaders = () => ({
-    headers: {
-      Authorization: `Bearer ${user?.token}`,
-    },
-  });
+  const [myBorrows, setMyBorrows] =
+    useState([]);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  const [history, setHistory] =
+    useState([]);
 
-  const getBookImage = (title) => {
-    const key = Object.keys(bookImages).find(
-      (k) => k.toLowerCase() === title?.trim().toLowerCase()
-    );
-    return key ? bookImages[key] : "/default.jpg";
-  };
+  const [
+    reservedBooks,
+    setReservedBooks,
+  ] = useState([]);
+
+  const [
+    returnedBooks,
+    setReturnedBooks,
+  ] = useState([]);
+
+  const [
+    reservedForMe,
+    setReservedForMe,
+  ] = useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
 
   /* ================= FETCH ================= */
-
-  const fetchBooks = async () => {
-    const res = await axios.get("/books", authHeaders());
-    setBooks(res.data.books || []);
-  };
-
-  const fetchMyBorrows = async () => {
-    const res = await axios.get(
-      "/transactions/my-borrows",
-      authHeaders()
-    );
-    setMyBorrows(res.data || []);
-  };
-
-  const fetchHistory = async () => {
-    const res = await axios.get(
-      "/transactions/history",
-      authHeaders()
-    );
-    setHistory(res.data || []);
-  };
-
-  const fetchDues = async () => {
-    const res = await axios.get(
-      "/transactions/dues",
-      authHeaders()
-    );
-    setDues(res.data || []);
-  };
-
-  const fetchReservedBooks = async () => {
-    const res = await axios.get(
-      "/books/reserved/my",
-      authHeaders()
-    );
-    setReservedBooks(res.data.books || []);
-  };
 
   const loadDashboard = async () => {
     try {
       setLoading(true);
 
-      await Promise.all([
-        fetchBooks(),
-        fetchMyBorrows(),
-        fetchHistory(),
-        fetchDues(),
-        fetchReservedBooks(),
+      const [
+        booksRes,
+        borrowsRes,
+        historyRes,
+        reservedRes,
+        returnedRes,
+      ] = await Promise.all([
+        getBooks(),
+        getMyBorrows(),
+        getMyHistory(),
+        getMyReservedBooks(),
+        getMyReturnedBooks(),
       ]);
-    } catch {
-      toast.error("Failed to load dashboard");
+
+      setBooks(
+        booksRes?.books || []
+      );
+
+      setMyBorrows(
+        borrowsRes || []
+      );
+
+      setHistory(
+        historyRes || []
+      );
+
+      setReservedBooks(
+        reservedRes || []
+      );
+
+      setReturnedBooks(
+        returnedRes || []
+      );
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        "Failed to load dashboard"
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  /* ================= RESERVED FOR ME ================= */
+
+  const fetchReservedForMe =
+    async () => {
+      try {
+        const res =
+          await getReservedForMe();
+
+        setReservedForMe(
+          res.books || []
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+  /* ================= LOAD ================= */
+
   useEffect(() => {
     if (user?.token) {
       loadDashboard();
+
+      fetchReservedForMe();
     }
-  }, [user?.token]);
+  }, [user]);
 
-  /* ================= ACTIONS ================= */
-
-  const borrowBook = async (id) => {
-    try {
-      await axios.post(
-        `/transactions/borrow/${id}`,
-        {},
-        authHeaders()
-      );
-      toast.success("Book borrowed successfully");
-      loadDashboard();
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Borrow failed"
-      );
-    }
-  };
-
-  const reserveBook = async (id) => {
-    try {
-      await axios.post(
-        `/books/reserve/${id}`,
-        {},
-        authHeaders()
-      );
-      toast.success("Book reserved successfully");
-      loadDashboard();
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Reserve failed"
-      );
-    }
-  };
-
-  const claimReservedBook = async (id) => {
-    try {
-      await axios.post(
-        `/books/claim/${id}`,
-        {},
-        authHeaders()
-      );
-      toast.success("Reserved book borrowed");
-      loadDashboard();
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Claim failed"
-      );
-    }
-  };
-
-  const cancelReservation = async (id) => {
-    try {
-      await axios.post(
-        `/books/cancel-reserve/${id}`,
-        {},
-        authHeaders()
-      );
-      toast.success("Reservation cancelled");
-      loadDashboard();
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Cancel failed"
-      );
-    }
-  };
-
-  const returnBook = async (id) => {
-    try {
-      await axios.post(
-        `/transactions/return/${id}`,
-        {},
-        authHeaders()
-      );
-      toast.success("Book returned successfully");
-      loadDashboard();
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Return failed"
-      );
-    }
-  };
-
-  const renewBook = async (id) => {
-    try {
-      await axios.post(
-        `/transactions/renew/${id}`,
-        {},
-        authHeaders()
-      );
-      toast.success("Book renewed successfully");
-      loadDashboard();
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Renew failed"
-      );
-    }
-  };
-
-  const payFine = async (id) => {
-    try {
-      await axios.post(
-        `/transactions/pay-fine/${id}`,
-        {},
-        authHeaders()
-      );
-      toast.success("Fine paid successfully");
-      loadDashboard();
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Payment failed"
-      );
-    }
-  };
-
-  /* ================= FILTER ================= */
-
-  const filteredBooks = books.filter(
-    (book) =>
-      book.title
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      book.author
-        .toLowerCase()
-        .includes(search.toLowerCase())
-  );
+  /* ================= CHART ================= */
 
   const chartData = [
-    { name: "Borrowed", value: myBorrows.length },
+    {
+      name: "Borrowed",
+      value: myBorrows.length,
+    },
+
     {
       name: "Returned",
-      value: history.filter(
-        (h) => h.status === "returned"
-      ).length,
+      value: returnedBooks.length,
     },
+
     {
-      name: "Available",
-      value: books.filter((b) => b.available)
-        .length,
+      name: "Reserved",
+      value:
+        reservedBooks.length,
     },
   ];
 
-  const totalFine = dues.reduce(
-    (sum, item) => sum + (item.fine || 0),
-    0
+  /* ================= FINE ================= */
+
+  const totalFine =
+    history.reduce(
+      (sum, item) =>
+        sum + (item.fine || 0),
+      0
+    );
+
+  /* ================= RECENT ACTIVITY ================= */
+
+  const recentActivities = [
+    ...myBorrows.map((b) => ({
+      type: "borrow",
+      text: `Borrowed ${b.book?.title}`,
+      date: b.borrowDate,
+    })),
+
+    ...reservedBooks.map(
+      (r) => ({
+        type: "reserve",
+        text: `Reserved ${
+          r.book?.title || ""
+        }`,
+        date: r.createdAt,
+      })
+    ),
+
+    ...returnedBooks.map(
+      (r) => ({
+        type: "return",
+        text: `Returned ${
+          r.book?.title || ""
+        }`,
+        date: r.returnDate,
+      })
+    ),
+  ]
+    .sort(
+      (a, b) =>
+        new Date(b.date) -
+        new Date(a.date)
+    )
+    .slice(0, 8);
+
+  /* ================= NOTIFICATIONS ================= */
+
+  const notifications = [];
+
+  reservedForMe.forEach(
+    (book) => {
+      notifications.push({
+        type: "reserved",
+        text: `${book.title} is ready for borrowing`,
+      });
+    }
   );
+
+  myBorrows.forEach(
+    (borrow) => {
+      const dueDate =
+        new Date(
+          borrow.dueDate
+        );
+
+      const today =
+        new Date();
+
+      const diff =
+        Math.ceil(
+          (dueDate - today) /
+            (1000 *
+              60 *
+              60 *
+              24)
+        );
+
+      if (
+        diff <= 2 &&
+        diff >= 0
+      ) {
+        notifications.push({
+          type: "warning",
+          text: `${borrow.book?.title} is due in ${diff} day(s)`,
+        });
+      }
+
+      if (diff < 0) {
+        notifications.push({
+          type: "overdue",
+          text: `${borrow.book?.title} is overdue`,
+        });
+      }
+    }
+  );
+
+  if (totalFine > 0) {
+    notifications.push({
+      type: "fine",
+      text: `Pending fine ₹${totalFine}`,
+    });
+  }
+
+  /* ================= RECOMMENDATIONS ================= */
+
+  const recommendedBooks =
+    books
+      .filter((book) => {
+        const alreadyBorrowed =
+          history.some(
+            (h) =>
+              h.book?._id ===
+              book._id
+          );
+
+        if (alreadyBorrowed)
+          return false;
+
+        const sameGenre =
+          history.some(
+            (h) =>
+              h.book?.genre ===
+              book.genre
+          );
+
+        const sameAuthor =
+          history.some(
+            (h) =>
+              h.book?.author ===
+              book.author
+          );
+
+        return (
+          sameGenre ||
+          sameAuthor
+        );
+      })
+      .slice(0, 4);
+
+  /* ================= LOADING ================= */
 
   if (loading) {
     return (
       <div className="dashboard-container">
-        <h2>Loading Dashboard...</h2>
+        <h2>
+          Loading Dashboard...
+        </h2>
       </div>
     );
   }
 
   return (
-    <div className="dashboard-layout">
-      {/* SIDEBAR */}
-      <div className="sidebar">
-        <h2>📚 Library</h2>
+    <div className="dashboard-container">
 
-        <button
-          onClick={() =>
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            })
-          }
-        >
-          Books
-        </button>
+      {/* ================= HEADER ================= */}
 
-        <button
-          onClick={() =>
-            document
-              .getElementById("my-borrows")
-              ?.scrollIntoView({
-                behavior: "smooth",
-              })
-          }
-        >
-          My Books
-        </button>
+      <h2 className="dashboard-title">
+        👋 Welcome {user?.name}
+      </h2>
 
-        <button
-          onClick={() =>
-            document
-              .getElementById("history")
-              ?.scrollIntoView({
-                behavior: "smooth",
-              })
-          }
-        >
-          History
-        </button>
+      {/* ================= STATS ================= */}
 
-        <button
-          onClick={() =>
-            document
-              .getElementById("dues")
-              ?.scrollIntoView({
-                behavior: "smooth",
-              })
-          }
-        >
-          Fines
-        </button>
+      <div className="stats-container">
 
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-      </div>
+        <div className="stat-card">
+          <h4>
+            Available Books
+          </h4>
 
-      {/* MAIN */}
-      <div className="dashboard-container">
-        <h2>👋 Welcome {user?.name}</h2>
-
-        <input
-          className="search-bar"
-          placeholder="Search books..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-        />
-
-        {/* STATS */}
-        <div className="stats-container">
-          <div className="stat-card">
-            <h4>Available</h4>
-            <p>
-              {
-                books.filter((b) => b.available)
-                  .length
-              }
-            </p>
-          </div>
-
-          <div className="stat-card">
-            <h4>Borrowed</h4>
-            <p>{myBorrows.length}</p>
-          </div>
-
-          <div className="stat-card">
-            <h4>Reserved</h4>
-            <p>{reservedBooks.length}</p>
-          </div>
-
-          <div className="stat-card">
-            <h4>Fine</h4>
-            <p>₹{totalFine}</p>
-          </div>
+          <p>
+            {
+              books.filter(
+                (b) =>
+                  b.status ===
+                  "available"
+              ).length
+            }
+          </p>
         </div>
 
-        {/* CHART */}
-        <h3>📊 My Analytics</h3>
+        <div className="stat-card">
+          <h4>Borrowed</h4>
+
+          <p>
+            {myBorrows.length}
+          </p>
+        </div>
+
+        <div className="stat-card">
+          <h4>Reserved</h4>
+
+          <p>
+            {
+              reservedBooks.length
+            }
+          </p>
+        </div>
+
+        <div className="stat-card">
+          <h4>Total Fine</h4>
+
+          <p>
+            ₹{totalFine}
+          </p>
+        </div>
+
+      </div>
+
+      {/* ================= NOTIFICATIONS ================= */}
+
+      <div className="notification-section">
+
+        <h3>
+          🔔 Notifications
+        </h3>
+
+        {notifications.length ===
+        0 ? (
+          <p className="empty-text">
+            No notifications
+          </p>
+        ) : (
+          <div className="notification-list">
+
+            {notifications.map(
+              (
+                note,
+                index
+              ) => (
+                <div
+                  key={index}
+                  className={`notification-card ${note.type}`}
+                >
+
+                  <span className="notification-icon">
+
+                    {note.type ===
+                      "reserved" &&
+                      "📚"}
+
+                    {note.type ===
+                      "warning" &&
+                      "⏳"}
+
+                    {note.type ===
+                      "overdue" &&
+                      "⚠"}
+
+                    {note.type ===
+                      "fine" &&
+                      "💰"}
+
+                  </span>
+
+                  <p>
+                    {note.text}
+                  </p>
+
+                </div>
+              )
+            )}
+
+          </div>
+        )}
+      </div>
+
+      {/* ================= CHART ================= */}
+
+      <div className="chart-section">
+
+        <h3>
+          📊 My Analytics
+        </h3>
 
         <div
-          className="stat-card"
-          style={{ height: "320px" }}
+          style={{
+            width: "100%",
+            height: 320,
+          }}
         >
+
           <ResponsiveContainer
             width="100%"
             height="100%"
           >
+
             <PieChart>
+
               <Pie
                 data={chartData}
                 dataKey="value"
                 outerRadius={110}
                 label
               >
+
                 {chartData.map(
-                  (entry, index) => (
+                  (
+                    entry,
+                    index
+                  ) => (
                     <Cell
                       key={index}
                       fill={
@@ -412,221 +469,217 @@ const MemberDashboard = () => {
                     />
                   )
                 )}
+
               </Pie>
+
               <Tooltip />
+
             </PieChart>
+
           </ResponsiveContainer>
-        </div>
 
-        {/* BOOKS */}
-        <h3>📚 Books</h3>
-
-        <div className="book-grid">
-          {filteredBooks.map((book) => {
-            const isReserved =
-              reservedBooks.some(
-                (r) => r._id === book._id
-              );
-
-            return (
-              <motion.div
-                key={book._id}
-                className="book-card"
-                whileHover={{
-                  scale: 1.03,
-                }}
-              >
-                <img
-                  src={getBookImage(
-                    book.title
-                  )}
-                  alt={book.title}
-                  className="book-image"
-                />
-
-                <h4>{book.title}</h4>
-                <p>{book.author}</p>
-                <p>{book.genre}</p>
-
-                <p>
-                  {book.available
-                    ? "🟢 Available"
-                    : isReserved
-                    ? "🟡 Reserved"
-                    : "🔴 Borrowed"}
-                </p>
-
-                {book.available ? (
-                  <button
-                    className="borrow-btn"
-                    onClick={() =>
-                      borrowBook(
-                        book._id
-                      )
-                    }
-                  >
-                    Borrow
-                  </button>
-                ) : isReserved ? (
-                  <button
-                    className="reserved-btn"
-                    disabled
-                  >
-                    Reserved
-                  </button>
-                ) : (
-                  <button
-                    className="reserve-btn"
-                    onClick={() =>
-                      reserveBook(
-                        book._id
-                      )
-                    }
-                  >
-                    Reserve
-                  </button>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* MY BORROWS */}
-        <h3 id="my-borrows">
-          📦 My Borrowed Books
-        </h3>
-
-        <div className="book-grid">
-          {myBorrows.length === 0 && (
-            <p>No borrowed books</p>
-          )}
-
-          {myBorrows.map((item) => (
-            <div
-              key={item._id}
-              className="book-card"
-            >
-              <h4>{item.book?.title}</h4>
-              <p>{item.book?.author}</p>
-
-              <p>
-                Due:{" "}
-                {new Date(
-                  item.dueDate
-                ).toDateString()}
-              </p>
-
-              <button
-                className="borrow-btn"
-                onClick={() =>
-                  renewBook(item._id)
-                }
-              >
-                Renew
-              </button>
-
-              <button
-                className="return-btn"
-                onClick={() =>
-                  returnBook(item._id)
-                }
-              >
-                Return
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* RESERVED BOOKS */}
-        <h3>📌 Reserved Books</h3>
-
-        <div className="book-grid">
-          {reservedBooks.length === 0 ? (
-            <p>No reserved books</p>
-          ) : (
-            reservedBooks.map((book) => (
-              <div
-                key={book._id}
-                className="book-card"
-              >
-                <h4>{book.title}</h4>
-                <p>{book.author}</p>
-
-                <button
-                  className="borrow-btn"
-                  onClick={() =>
-                    claimReservedBook(
-                      book._id
-                    )
-                  }
-                >
-                  Borrow Now
-                </button>
-
-                <button
-                  className="return-btn"
-                  onClick={() =>
-                    cancelReservation(
-                      book._id
-                    )
-                  }
-                >
-                  Cancel
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* HISTORY */}
-        <h3 id="history">
-          📜 Borrow History
-        </h3>
-
-        <div className="book-grid">
-          {history.map((item) => (
-            <div
-              key={item._id}
-              className="book-card"
-            >
-              <h4>{item.book?.title}</h4>
-              <p>{item.book?.author}</p>
-              <p>{item.status}</p>
-              <p>Fine ₹{item.fine || 0}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* DUES */}
-        <h3 id="dues">
-          💳 Pending Fines
-        </h3>
-
-        <div className="book-grid">
-          {dues.length === 0 ? (
-            <p>No pending fines</p>
-          ) : (
-            dues.map((item) => (
-              <div
-                key={item._id}
-                className="book-card"
-              >
-                <h4>{item.book?.title}</h4>
-                <p>₹{item.fine}</p>
-
-                <button
-                  className="borrow-btn"
-                  onClick={() =>
-                    payFine(item._id)
-                  }
-                >
-                  Pay Fine
-                </button>
-              </div>
-            ))
-          )}
         </div>
       </div>
+
+      {/* ================= RESERVED FOR YOU ================= */}
+
+      <div className="reserved-section">
+
+        <h3>
+          📚 Reserved For You
+        </h3>
+
+        {reservedForMe.length ===
+        0 ? (
+          <p className="empty-text">
+            No reserved books
+          </p>
+        ) : (
+          <div className="reserved-grid">
+
+            {reservedForMe.map(
+              (book) => (
+                <div
+                  key={book._id}
+                  className="reserved-card"
+                >
+
+                  <h4>
+                    {book.title}
+                  </h4>
+
+                  <p>
+                    {book.author}
+                  </p>
+
+                  <span>
+                    Ready for borrowing
+                  </span>
+
+                </div>
+              )
+            )}
+
+          </div>
+        )}
+      </div>
+
+      {/* ================= TIMELINE ================= */}
+
+      <div className="timeline-section">
+
+        <h3>
+          🕒 Recent Activity
+        </h3>
+
+        {recentActivities.length ===
+        0 ? (
+          <p className="empty-text">
+            No recent activity
+          </p>
+        ) : (
+          <div className="timeline-list">
+
+            {recentActivities.map(
+              (
+                item,
+                index
+              ) => (
+                <div
+                  key={index}
+                  className="timeline-item"
+                >
+
+                  <div className="timeline-icon">
+
+                    {item.type ===
+                      "borrow" &&
+                      "📚"}
+
+                    {item.type ===
+                      "reserve" &&
+                      "🟡"}
+
+                    {item.type ===
+                      "return" &&
+                      "↩"}
+
+                  </div>
+
+                  <div>
+
+                    <p className="timeline-text">
+                      {item.text}
+                    </p>
+
+                    <span className="timeline-date">
+                      {new Date(
+                        item.date
+                      ).toLocaleDateString()}
+                    </span>
+
+                  </div>
+
+                </div>
+              )
+            )}
+
+          </div>
+        )}
+      </div>
+
+      {/* ================= RECOMMENDED BOOKS ================= */}
+
+      <div className="recommend-section">
+
+        <h3>
+          ⭐ Recommended Books
+        </h3>
+
+        {recommendedBooks.length ===
+        0 ? (
+          <p className="empty-text">
+            No recommendations yet
+          </p>
+        ) : (
+          <div className="recommend-grid">
+
+            {recommendedBooks.map(
+              (book) => (
+                <div
+                  key={book._id}
+                  className="recommend-card"
+                >
+
+                  <h4>
+                    {book.title}
+                  </h4>
+
+                  <p>
+                    {book.author}
+                  </p>
+
+                  <span>
+                    {book.genre}
+                  </span>
+
+                </div>
+              )
+            )}
+
+          </div>
+        )}
+      </div>
+
+      {/* ================= RECENT BORROWS ================= */}
+
+      <div className="recent-section">
+
+        <h3>
+          📚 Recent Borrowed Books
+        </h3>
+
+        {myBorrows.length ===
+        0 ? (
+          <p>
+            No borrowed books
+          </p>
+        ) : (
+          <div className="borrow-list">
+
+            {myBorrows
+              .slice(0, 5)
+              .map((item) => (
+                <div
+                  key={item._id}
+                  className="borrow-item"
+                >
+
+                  <h4>
+                    {
+                      item.book
+                        ?.title
+                    }
+                  </h4>
+
+                  <p>
+                    {
+                      item.book
+                        ?.author
+                    }
+                  </p>
+
+                  <span>
+                    Borrowed
+                  </span>
+
+                </div>
+              ))}
+
+          </div>
+        )}
+      </div>
+
     </div>
   );
 };

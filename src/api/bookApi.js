@@ -1,8 +1,7 @@
 import API from "./axios";
 
 /* =====================================
-   GET BOOKS
-   Search + Filter + Sort + Pagination
+   GET ALL BOOKS
 ===================================== */
 export const getBooks = async (params = {}) => {
   const res = await API.get("/books", { params });
@@ -18,15 +17,16 @@ export const getBookById = async (id) => {
 };
 
 /* =====================================
-   ADD BOOK (Admin)
+   ADD BOOK
 ===================================== */
 export const addBook = async (payload) => {
-  const res = await API.post("/books/add", payload);
+  // backend route = POST /api/books
+  const res = await API.post("/books", payload);
   return res.data;
 };
 
 /* =====================================
-   UPDATE BOOK (If Route Exists)
+   UPDATE BOOK
 ===================================== */
 export const updateBook = async (id, payload) => {
   const res = await API.put(`/books/${id}`, payload);
@@ -34,26 +34,35 @@ export const updateBook = async (id, payload) => {
 };
 
 /* =====================================
-   DELETE BOOK (If Route Exists)
+   DELETE BOOK
 ===================================== */
 export const deleteBook = async (id) => {
   const res = await API.delete(`/books/${id}`);
   return res.data;
 };
 
-/* =====================================
-   RESERVE BOOK
-===================================== */
-export const reserveBook = async (id) => {
-  const res = await API.post(`/books/reserve/${id}`);
+export const joinQueue = async (id) => {
+  const res = await API.post(
+    `/books/${id}/join-queue`
+  );
+
   return res.data;
 };
 
+export const getReservedForMe =
+  async () => {
+
+    const res = await API.get(
+      "/books/reserved/me"
+    );
+
+    return res.data;
+  };
+  
 export default {
   getBooks,
   getBookById,
   addBook,
   updateBook,
   deleteBook,
-  reserveBook,
 };

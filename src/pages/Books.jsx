@@ -1,12 +1,18 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { getBooks, reserveBook } from "../api/bookApi";
-import { borrowBook } from "../api/borrowApi";
+import { getBooks, joinQueue } from "../api/bookApi";
+
+import {
+  borrowBook,
+  getMyReservedBooks,
+} from "../api/borrowApi";
+
 import { toast } from "react-toastify";
 import "../styles/books.css";
 
 /* ================= IMAGE MAP ================= */
+
 const bookImages = {
   "React Guide": "/react guide.jpg",
   "Geographical Tales": "/geo tales.jpg",
@@ -18,102 +24,191 @@ const bookImages = {
 };
 
 /* ================= IMAGE HELPER ================= */
+
 const getBookImage = (title) => {
   const key = Object.keys(bookImages).find(
-    (k) => k.toLowerCase() === (title || "").trim().toLowerCase()
+    (k) =>
+      k.toLowerCase() ===
+      (title || "").trim().toLowerCase()
   );
 
-  return key ? bookImages[key] : "/default.jpg";
+  return key
+    ? bookImages[key]
+    : "/default.jpg";
 };
 
 const Books = () => {
   const [books, setBooks] = useState([]);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
-  const [sort, setSort] = useState("none");
-  const [loadingId, setLoadingId] = useState(null);
+
+  const [reservedBooks, setReservedBooks] =
+    useState([]);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [filter, setFilter] =
+    useState("all");
+
+  const [sort, setSort] =
+    useState("none");
+
+  const [loadingId, setLoadingId] =
+    useState(null);
 
   const { user } = useAuth();
 
-  const authHeaders = () => ({
-    headers: {
-      Authorization: `Bearer ${user?.token}`,
-    },
-  });
+  /* ================= FETCH BOOKS ================= */
 
-  /* ================= FETCH BOOKS (FIXED) ================= */
   const fetchBooks = async () => {
     try {
       const res = await getBooks();
 
-      // ✅ FIX: handle all API formats safely
       const booksData =
-        res?.books || res?.data?.books || res?.data || [];
+        res?.books ||
+        res?.data?.books ||
+        res?.data ||
+        [];
 
-      setBooks(Array.isArray(booksData) ? booksData : []);
+      setBooks(
+        Array.isArray(booksData)
+          ? booksData
+          : []
+      );
     } catch (err) {
-      toast.error(err.message || "Failed to fetch books");
+      toast.error(
+        err.response?.data?.message ||
+          "Failed to fetch books"
+      );
+
       setBooks([]);
     }
   };
 
+  /* ================= FETCH RESERVED ================= */
+
+  const fetchReserved = async () => {
+    try {
+      const res =
+        await getMyReservedBooks();
+
+      const records =
+        res?.records ||
+        res?.data ||
+        res ||
+        [];
+
+      const reservedIds = records.map(
+        (r) => r.book?._id
+      );
+
+      setReservedBooks(reservedIds);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* ================= INITIAL LOAD ================= */
+
   useEffect(() => {
-    fetchBooks();
-  }, []);
+    if (user?.token) {
+      fetchBooks();
+      fetchReserved();
+    }
+  }, [user]);
 
   /* ================= FILTER + SORT ================= */
-  const filteredBooks = useMemo(() => {
-    let result = [...(books || [])];
 
-    // SEARCH
+  const filteredBooks = useMemo(() => {
+    let result = [...books];
+
+    /* SEARCH */
+
     result = result.filter((book) =>
-      book?.title?.toLowerCase().includes(search.toLowerCase())
+      book?.title
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
     );
 
-    // FILTER
+    /* FILTER */
+
     if (filter === "available") {
-      result = result.filter((b) => b.available === true);
+      result = result.filter(
+        (b) => b.availableCopies > 0
+      );
     }
 
     if (filter === "borrowed") {
-      result = result.filter((b) => b.available === false);
+      result = result.filter(
+        (b) => b.availableCopies <= 0
+      );
     }
 
-    // SORT
+    /* SORT */
+
     if (sort === "az") {
-      result.sort((a, b) => a.title.localeCompare(b.title));
+      result.sort((a, b) =>
+        a.title.localeCompare(
+          b.title
+        )
+      );
     }
 
     if (sort === "za") {
-      result.sort((a, b) => b.title.localeCompare(a.title));
+      result.sort((a, b) =>
+        b.title.localeCompare(
+          a.title
+        )
+      );
     }
 
     return result;
   }, [books, search, filter, sort]);
 
   /* ================= BORROW ================= */
-  const handleBorrow = async (id) => {
+
+  const handleBorrow = async (
+    bookId
+  ) => {
     try {
-      setLoadingId(id);
-      await borrowBook(id);
-      toast.success("Book borrowed successfully!");
-      fetchBooks();
+      setLoadingId(bookId);
+
+      await borrowBook(bookId);
+
+      toast.success(
+        "Book borrowed successfully!"
+      );
+
+      await fetchBooks();
+      await fetchReserved();
     } catch (err) {
-      toast.error(err.message || "Error borrowing book");
+      toast.error(
+        err.response?.data?.message ||
+          "Borrow failed"
+      );
     } finally {
       setLoadingId(null);
     }
   };
 
-  /* ================= RESERVE ================= */
-  const handleReserve = async (id) => {
+  /* ================= JOIN QUEUE ================= */
+
+  const handleJoinQueue = async (
+    id
+  ) => {
     try {
       setLoadingId(id);
-      await reserveBook(id);
-      toast.success("Book reserved successfully!");
-      fetchBooks();
-    } catch (err) {
-      toast.error(err.message || "Error reserving book");
+
+      const res = await joinQueue(id);
+
+      toast.success(res.message);
+
+      await fetchBooks();
+      await fetchReserved();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to join queue"
+      );
     } finally {
       setLoadingId(null);
     }
@@ -121,81 +216,206 @@ const Books = () => {
 
   return (
     <div className="dashboard-container">
-      <h2 className="text-2xl font-bold mb-4">📚 Books Library</h2>
 
-      {/* SEARCH */}
+      {/* ================= TITLE ================= */}
+
+      <h2 className="books-title">
+        📚 Books Library
+      </h2>
+
+      {/* ================= SEARCH ================= */}
+
       <input
         type="text"
         placeholder="Search books..."
         className="search-bar"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
       />
 
-      {/* FILTER + SORT */}
-      <div className="flex gap-4 my-4">
-        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-          <option value="all">All</option>
-          <option value="available">Available</option>
-          <option value="borrowed">Borrowed</option>
+      {/* ================= FILTER + SORT ================= */}
+
+      <div className="filter-section">
+
+        <select
+          value={filter}
+          onChange={(e) =>
+            setFilter(e.target.value)
+          }
+        >
+          <option value="all">
+            All Books
+          </option>
+
+          <option value="available">
+            Available
+          </option>
+
+          <option value="borrowed">
+            Unavailable
+          </option>
         </select>
 
-        <select value={sort} onChange={(e) => setSort(e.target.value)}>
-          <option value="none">Sort</option>
-          <option value="az">A-Z</option>
-          <option value="za">Z-A</option>
+        <select
+          value={sort}
+          onChange={(e) =>
+            setSort(e.target.value)
+          }
+        >
+          <option value="none">
+            Sort
+          </option>
+
+          <option value="az">
+            A-Z
+          </option>
+
+          <option value="za">
+            Z-A
+          </option>
         </select>
       </div>
 
-      {/* BOOK GRID */}
+      {/* ================= BOOK GRID ================= */}
+
       <div className="book-grid">
-        {filteredBooks.map((book) => (
-          <motion.div
-            key={book._id}
-            className="book-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <img
-              src={getBookImage(book.title)}
-              alt={book.title}
-              className="book-image"
-              onError={(e) => {
-                e.target.src = "/default.jpg";
+
+        {filteredBooks.map((book) => {
+
+          const isReserved =
+            reservedBooks.includes(
+              book._id
+            );
+
+          return (
+            <motion.div
+              key={book._id}
+              className="book-card"
+              initial={{
+                opacity: 0,
+                y: 20,
               }}
-            />
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              whileHover={{
+                scale: 1.04,
+              }}
+            >
 
-            <h3>{book.title}</h3>
-            <p>{book.author}</p>
+              {/* ================= IMAGE ================= */}
 
-            <p>
-              {book.available ? "🟢 Available" : "🔴 Borrowed"}
-            </p>
+              <img
+                src={getBookImage(
+                  book.title
+                )}
+                alt={book.title}
+                className="book-image"
+                onError={(e) =>
+                  (e.target.src =
+                    "/default.jpg")
+                }
+              />
 
-            {/* ACTIONS */}
-            {book.available ? (
-              <button
-                disabled={loadingId === book._id}
-                onClick={() => handleBorrow(book._id)}
-              >
-                {loadingId === book._id ? "Loading..." : "Borrow"}
-              </button>
-            ) : (
-              <button
-                disabled={loadingId === book._id}
-                onClick={() => handleReserve(book._id)}
-              >
-                {loadingId === book._id ? "Loading..." : "Reserve"}
-              </button>
-            )}
-          </motion.div>
-        ))}
+              {/* ================= TITLE ================= */}
+
+              <h3>{book.title}</h3>
+
+              {/* ================= AUTHOR ================= */}
+
+              <p className="author-text">
+                ✍ {book.author}
+              </p>
+
+              {/* ================= STATUS ================= */}
+
+              <p className="book-status">
+                {book.availableCopies > 0
+                  ? "🟢 Available"
+                  : "🔴 Unavailable"}
+              </p>
+
+              {/* ================= COPIES ================= */}
+
+              <p className="copies-text">
+                Copies Available:{" "}
+                {
+                  book.availableCopies
+                }
+              </p>
+
+              {/* ================= QUEUE ================= */}
+
+              {book.availableCopies <= 0 && (
+                <p className="queue-text">
+                  Queue:
+                  {" "}
+                  {book
+                    .reservationQueue
+                    ?.length || 0}
+                </p>
+              )}
+
+              {/* ================= BORROW ================= */}
+
+              {book.availableCopies > 0 && (
+                <button
+                  className="borrow-btn"
+                  disabled={
+                    loadingId ===
+                    book._id
+                  }
+                  onClick={() =>
+                    handleBorrow(
+                      book._id
+                    )
+                  }
+                >
+                  {loadingId ===
+                  book._id
+                    ? "Loading..."
+                    : "Borrow Book"}
+                </button>
+              )}
+
+              {/* ================= JOIN QUEUE ================= */}
+
+              {book.availableCopies <= 0 && (
+                <button
+                  className="queue-btn"
+                  disabled={
+                    isReserved ||
+                    loadingId ===
+                      book._id
+                  }
+                  onClick={() =>
+                    handleJoinQueue(
+                      book._id
+                    )
+                  }
+                >
+                  {loadingId ===
+                  book._id
+                    ? "Loading..."
+                    : isReserved
+                    ? "Already Queued"
+                    : "⏳ Join Queue"}
+                </button>
+              )}
+
+            </motion.div>
+          );
+        })}
       </div>
 
-      {/* EMPTY STATE */}
-      {filteredBooks.length === 0 && (
-        <p className="mt-4 text-gray-500">
+      {/* ================= EMPTY ================= */}
+
+      {filteredBooks.length ===
+        0 && (
+        <p className="no-data">
           No books found 📭
         </p>
       )}

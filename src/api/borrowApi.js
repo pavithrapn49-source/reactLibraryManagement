@@ -1,39 +1,53 @@
 import API from "./axios";
 
-// ================= BORROW BOOK =================
+/* ================= RESERVE BOOK ================= */
+export const reserveBook = async (bookId) => {
+  const res = await API.post("/borrow/reserve", { bookId });
+  return res.data;
+};
+
+/* ================= BORROW BOOK ================= */
 export const borrowBook = async (bookId) => {
-  const res = await API.post(`/transactions/borrow/${bookId}`);
+  const res = await API.post("/borrow/borrow", { bookId });
   return res.data;
 };
 
-// ================= RETURN BOOK =================
+/* ================= RETURN BOOK ================= */
 export const returnBook = async (borrowId) => {
-  const res = await API.put(`/transactions/return/${borrowId}`);
+  const res = await API.post("/borrow/return", { borrowId });
   return res.data;
 };
 
-// ================= MY BORROWS =================
+/* ================= RESERVED BOOKS ================= */
+export const getMyReservedBooks = async () => {
+  const res = await API.get("/borrow/reserved");
+  return res.data;
+};
+
+/* ================= BORROWED BOOKS ================= */
 export const getMyBorrows = async () => {
-  const res = await API.get("/transactions/my-borrows");
+  const res = await API.get("/borrow/borrowed");
   return res.data;
 };
 
-// ================= HISTORY =================
-export const getHistory = async () => {
-  const res = await API.get("/transactions/history");
+/* ================= RETURNED BOOKS ================= */
+export const getMyReturnedBooks = async () => {
+  const res = await API.get("/borrow/returned");
   return res.data;
 };
 
-// ================= ALL BORROWS =================
-export const getAllBorrows = async () => {
-  const res = await API.get("/transactions");
+/* ================= FULL HISTORY ================= */
+export const getMyHistory = async () => {
+  const res = await API.get("/borrow/history");
   return res.data;
 };
 
 export default {
+  reserveBook,
   borrowBook,
   returnBook,
+  getMyReservedBooks,
   getMyBorrows,
-  getHistory,
-  getAllBorrows,
+  getMyReturnedBooks,
+  getMyHistory,
 };

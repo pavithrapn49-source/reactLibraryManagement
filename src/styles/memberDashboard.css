@@ -185,3 +185,305 @@ body {
     padding: 20px;
   }
 }
+
+/* ================= RECENT BORROW SECTION ================= */
+
+.recent-section {
+  margin-top: 30px;
+}
+
+.borrow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.borrow-item {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 18px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transition: 0.3s ease;
+}
+
+.borrow-item:hover {
+  transform: translateY(-3px);
+}
+
+.borrow-item h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.borrow-item p {
+  margin: 8px 0;
+  color: #475569;
+  font-size: 14px;
+}
+
+.borrow-item span {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: #22c55e;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ================= RESERVED FOR YOU ================= */
+
+.reserved-section {
+  margin-top: 35px;
+}
+
+.reserved-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(240px, 1fr)
+  );
+  gap: 20px;
+}
+
+.reserved-card {
+  background: rgba(255,255,255,0.9);
+
+  padding: 20px;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 10px 25px
+    rgba(0,0,0,0.08);
+
+  transition: 0.3s ease;
+}
+
+.reserved-card:hover {
+  transform: translateY(-5px);
+}
+
+.reserved-card h4 {
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.reserved-card p {
+  color: #475569;
+}
+
+.reserved-card span {
+  display: inline-block;
+
+  margin-top: 10px;
+
+  padding: 6px 12px;
+
+  border-radius: 30px;
+
+  background: #dcfce7;
+
+  color: #166534;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+.empty-text {
+  color: #64748b;
+}
+
+/* ================= ACTIVITY TIMELINE ================= */
+
+.timeline-section {
+  margin-top: 40px;
+}
+
+.timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  background: rgba(255,255,255,0.88);
+
+  padding: 16px 18px;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 8px 20px
+    rgba(0,0,0,0.08);
+
+  transition: 0.3s ease;
+}
+
+.timeline-item:hover {
+  transform: translateX(5px);
+}
+
+.timeline-icon {
+  width: 50px;
+  height: 50px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+
+  background: linear-gradient(
+    135deg,
+    #6366f1,
+    #3b82f6
+  );
+
+  color: white;
+}
+
+.timeline-text {
+  margin: 0;
+  font-weight: 600;
+  color: #111827;
+}
+
+.timeline-date {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ================= NOTIFICATIONS ================= */
+
+.notification-section {
+  margin-top: 30px;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.notification-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 16px 18px;
+
+  border-radius: 16px;
+
+  font-weight: 500;
+
+  box-shadow:
+    0 8px 20px
+    rgba(0,0,0,0.06);
+
+  transition: 0.3s ease;
+}
+
+.notification-card:hover {
+  transform: translateX(4px);
+}
+
+/* TYPES */
+
+.notification-card.reserved {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.notification-card.warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.notification-card.overdue {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.notification-card.fine {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.notification-icon {
+  font-size: 22px;
+}
+
+/* ================= RECOMMENDED BOOKS ================= */
+
+.recommend-section {
+  margin-top: 40px;
+}
+
+.recommend-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(220px, 1fr)
+    );
+
+  gap: 20px;
+}
+
+.recommend-card {
+
+  background:
+    rgba(255,255,255,0.9);
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  box-shadow:
+    0 10px 25px
+    rgba(0,0,0,0.08);
+
+  transition: 0.3s ease;
+}
+
+.recommend-card:hover {
+  transform: translateY(-5px);
+}
+
+.recommend-card h4 {
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.recommend-card p {
+  color: #475569;
+  margin-bottom: 10px;
+}
+
+.recommend-card span {
+
+  display: inline-block;
+
+  padding: 6px 12px;
+
+  border-radius: 30px;
+
+  background: #ede9fe;
+
+  color: #6d28d9;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}

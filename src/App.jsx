@@ -1,37 +1,28 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
 import Login from "./pages/Login";
-import Navbar from "./components/Navbar";
 import Register from "./pages/Register";
+import Navbar from "./components/Navbar";
+
 import MemberDashboard from "./pages/MemberDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import LibrarianDashboard from "./pages/LibrarianDashboard";
+
 import MyBorrow from "./pages/MyBorrow";
 import PayFine from "./pages/PayFine";
 import Books from "./pages/Books";
+
+import Dashboard from "./pages/Dashboard";
+
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Unauthorized from "./pages/Unauthorized";
 
-/* 🔔 TOAST IMPORT */
+/* 🔔 TOAST */
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-/* 🔐 DASHBOARD */
-const Dashboard = () => {
-  const { user, authLoading } = useAuth();
-
-  if (authLoading) return <h2>Loading...</h2>;
-
-  if (!user) return <Navigate to="/login" />;
-
-  if (user.role === "admin") return <AdminDashboard />;
-  if (user.role === "librarian") return <LibrarianDashboard />;
-
-  return <MemberDashboard />;
-};
-
-/* 🔥 WRAPPER COMPONENT */
+/* 🔥 WRAPPER */
 const AppContent = () => {
   const location = useLocation();
   const { user } = useAuth();
@@ -40,75 +31,49 @@ const AppContent = () => {
 
   return (
     <>
-      {/* 🚫 Hide Navbar on login/register */}
+      {/* ✅ Navbar */}
       {!hideNavbarPaths.includes(location.pathname) && <Navbar />}
 
-      {/* 🔔 Global Toast */}
+      {/* ✅ Toast */}
       <ToastContainer position="top-right" autoClose={2000} />
 
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Role-based dashboard */}
-        <Route path="/dashboard" element={<Dashboard />} />
-
-        <Route path="/unauthorized" element={<Unauthorized />} />
-
+        {/* 🔐 Dashboard Layout (MAIN FIX) */}
         <Route
-  path="/admin"
-  element={
-    <ProtectedRoute role="admin">
-      <AdminDashboard />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/librarian"
-  element={
-    <ProtectedRoute role="librarian">
-      <LibrarianDashboard />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/member"
-  element={
-    <ProtectedRoute role="member">
-      <MemberDashboard />
-    </ProtectedRoute>
-  }
-/>
-
-        <Route
-          path="/books"
+          path="/dashboard"
           element={
             <ProtectedRoute>
-              <Books />
+              <Dashboard />
             </ProtectedRoute>
           }
-        />
+        >
+          {/* Default page based on role */}
+          <Route
+            index
+            element={
+              user?.role === "admin" ? (
+                <AdminDashboard />
+              ) : user?.role === "librarian" ? (
+                <LibrarianDashboard />
+              ) : (
+                <MemberDashboard />
+              )
+            }
+          />
 
-        <Route
-          path="/my-borrows"
-          element={
-            <ProtectedRoute role="member">
-              <MyBorrow />
-            </ProtectedRoute>
-          }
-        />
+          {/* Member pages */}
+          <Route path="books" element={<Books />} />
+          <Route path="my-borrows" element={<MyBorrow />} />
+          <Route path="pay-fine" element={<PayFine />} />
+        </Route>
 
-        <Route
-          path="/pay-fine"
-          element={
-            <ProtectedRoute role="member">
-              <PayFine />
-            </ProtectedRoute>
-          }
-        />
+        {/* Unauthorized */}
+        <Route path="/unauthorized" element={<Unauthorized />} />
       </Routes>
     </>
   );

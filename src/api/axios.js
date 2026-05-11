@@ -1,18 +1,21 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://library-management-backend-0un8.onrender.com/api",
+  baseURL:
+    "https://library-management-backend-0un8.onrender.com/api",
   timeout: 60000,
 });
 
-// ================= REQUEST INTERCEPTOR =================
-// Automatically attach token
+/* ================= REQUEST INTERCEPTOR ================= */
 instance.interceptors.request.use(
   (config) => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(
+      localStorage.getItem("user")
+    );
 
     if (user?.token) {
-      config.headers.Authorization = `Bearer ${user.token}`;
+      config.headers.Authorization =
+        `Bearer ${user.token}`;
     }
 
     return config;
@@ -20,16 +23,13 @@ instance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ================= RESPONSE INTERCEPTOR =================
+/* ================= RESPONSE INTERCEPTOR ================= */
 instance.interceptors.response.use(
   (response) => response,
-  (error) => {
-    const message =
-      error.response?.data?.message ||
-      error.message ||
-      "Something went wrong";
 
-    return Promise.reject(new Error(message));
+  (error) => {
+    // keep original axios error
+    return Promise.reject(error);
   }
 );
 

@@ -331,6 +331,45 @@ h3{
   border-radius:10px;
 }
 
+/* ================= RECENT BORROW ACTIVITY ================= */
+
+.recent-activity {
+  margin-top: 30px;
+  background: rgba(255,255,255,0.9);
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* TABLE */
+
+.recent-activity table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.recent-activity th {
+  text-align: left;
+  padding: 14px;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 700;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.recent-activity td {
+  padding: 14px;
+  color: #334155;
+  font-size: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* ROW HOVER */
+
+.recent-activity tr:hover {
+  background: #f8fafc;
+}
+
 /* MOBILE */
 @media(max-width:768px){
 
@@ -349,4 +388,33 @@ h3{
   h3{
     font-size:22px;
   }
+}
+
+/* FORCE RECENT ACTIVITY TEXT VISIBILITY */
+
+.recent-activity,
+.recent-activity * {
+  opacity: 1 !important;
+}
+
+.recent-activity table {
+  background: white !important;
+}
+
+.recent-activity th {
+  color: #111827 !important;
+  font-weight: 700 !important;
+}
+
+.recent-activity td {
+  color: #1e293b !important;
+  font-weight: 500 !important;
+}
+
+.recent-activity h3 {
+  color: #0f172a !important;
+}
+
+.recent-activity tr {
+  background: transparent !important;
 }

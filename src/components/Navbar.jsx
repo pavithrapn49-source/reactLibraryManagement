@@ -11,30 +11,23 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  /* ================= ROLE DASHBOARD ================= */
-  const getDashboardRoute = () => {
-    if (user?.role === "admin") return "/admin";
-    if (user?.role === "librarian") return "/librarian";
-    return "/dashboard";
-  };
-
   const userName = user?.name || "User";
   const userRole = user?.role || "member";
 
   return (
     <nav className="navbar">
-      {/* ================= LOGO ================= */}
+      {/* LOGO */}
       <div
         className="logo"
-        onClick={() => navigate(getDashboardRoute())}
+        onClick={() => navigate("/dashboard")}
       >
         📚 Smart Library
       </div>
 
-      {/* ================= LINKS ================= */}
+      {/* LINKS */}
       <div className="nav-links">
         <NavLink
-          to={getDashboardRoute()}
+          to="/dashboard"
           className={({ isActive }) =>
             isActive ? "nav-link active-link" : "nav-link"
           }
@@ -43,7 +36,7 @@ const Navbar = () => {
         </NavLink>
 
         <NavLink
-          to="/books"
+          to="/dashboard/books"
           className={({ isActive }) =>
             isActive ? "nav-link active-link" : "nav-link"
           }
@@ -55,7 +48,7 @@ const Navbar = () => {
         {userRole === "member" && (
           <>
             <NavLink
-              to="/my-borrows"
+              to="/dashboard/my-borrows"
               className={({ isActive }) =>
                 isActive ? "nav-link active-link" : "nav-link"
               }
@@ -64,20 +57,20 @@ const Navbar = () => {
             </NavLink>
 
             <NavLink
-              to="/pay-fine"
+              to="/dashboard/pay-fine"
               className={({ isActive }) =>
                 isActive ? "nav-link active-link" : "nav-link"
               }
             >
-              Pay Fine
+              Fine Payment
             </NavLink>
           </>
         )}
 
-        {/* ADMIN LINK */}
+        {/* ADMIN */}
         {userRole === "admin" && (
           <NavLink
-            to="/admin"
+            to="/dashboard"
             className={({ isActive }) =>
               isActive ? "nav-link active-link" : "nav-link"
             }
@@ -86,10 +79,10 @@ const Navbar = () => {
           </NavLink>
         )}
 
-        {/* LIBRARIAN LINK */}
+        {/* LIBRARIAN */}
         {userRole === "librarian" && (
           <NavLink
-            to="/librarian"
+            to="/dashboard"
             className={({ isActive }) =>
               isActive ? "nav-link active-link" : "nav-link"
             }
@@ -99,16 +92,13 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* ================= RIGHT SIDE ================= */}
+      {/* RIGHT SIDE */}
       <div className="nav-right">
         <span className="user-role">
           👤 {userName} ({userRole})
         </span>
 
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
+        <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
       </div>

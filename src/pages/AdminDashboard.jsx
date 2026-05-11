@@ -516,45 +516,38 @@ const AdminDashboard = () => {
           </motion.div>
         ))}
       </div>
+{/* TRANSACTIONS */}
+<h3>📄 Recent Borrow Activity</h3>
 
-      {/* TRANSACTIONS */}
-      <h3>📄 Recent Borrow Activity</h3>
+<div className="recent-activity">
+  <table width="100%">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Book</th>
+        <th>Status</th>
+        <th>Due Date</th>
+      </tr>
+    </thead>
 
-      <div className="transaction-table">
-        <table width="100%">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Book</th>
-              <th>Status</th>
-              <th>Due Date</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {transactions
-              .slice(0, 8)
-              .map((t) => (
-                <tr key={t._id}>
-                  <td>
-                    {t.user?.name}
-                  </td>
-                  <td>
-                    {t.book?.title}
-                  </td>
-                  <td>
-                    {t.status}
-                  </td>
-                  <td>
-                    {new Date(
-                      t.dueDate
-                    ).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
+    <tbody>
+      {transactions
+        .slice(0, 8)
+        .map((t) => (
+          <tr key={t._id}>
+            <td>{t.user?.name}</td>
+            <td>{t.book?.title}</td>
+            <td>{t.status}</td>
+            <td>
+              {new Date(
+                t.dueDate
+              ).toLocaleDateString()}
+            </td>
+          </tr>
+        ))}
+    </tbody>
+  </table>
+</div>
 
     </div>
   );
