@@ -9,3 +9,102 @@ font-family:Arial, Helvetica, sans-serif;
 background:#020617;
 color:white;
 }
+
+/* ================= DARK MODE ================= */
+
+.dark-mode {
+
+  background: #0f172a !important;
+
+  color: white !important;
+}
+
+/* BODY */
+
+.dark-mode body {
+
+  background: linear-gradient(
+    135deg,
+    #020617,
+    #0f172a,
+    #111827
+  );
+}
+
+/* CARDS */
+
+.dark-mode .stat-card,
+.dark-mode .book-card,
+.dark-mode .borrow-item,
+.dark-mode .timeline-item,
+.dark-mode .recommend-card,
+.dark-mode .reserved-card,
+.dark-mode .notification-card {
+
+  background:
+    rgba(30,41,59,0.95);
+
+  color: white;
+}
+
+/* TEXT */
+
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode p,
+.dark-mode span {
+
+  color: white !important;
+}
+
+/* SIDEBAR */
+
+.dark-mode .sidebar {
+
+  background: linear-gradient(
+    180deg,
+    #111827,
+    #1e293b,
+    #0f172a
+  );
+}
+
+/* NAVBAR */
+
+.dark-mode .navbar {
+
+  background:
+    rgba(15,23,42,0.95);
+
+  border-bottom:
+    1px solid #334155;
+}
+
+/* INPUTS */
+
+.dark-mode input,
+.dark-mode select {
+
+  background: #1e293b;
+
+  color: white;
+
+  border: 1px solid #334155;
+}
+
+/* TABLE */
+
+.dark-mode table {
+
+  background: #111827;
+
+  color: white;
+}
+
+.dark-mode th,
+.dark-mode td {
+
+  color: white !important;
+}

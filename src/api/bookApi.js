@@ -58,7 +58,22 @@ export const getReservedForMe =
 
     return res.data;
   };
-  
+
+  export const addReview =
+  async (
+    bookId,
+    reviewData
+  ) => {
+
+    const res =
+      await API.post(
+        `/books/${bookId}/review`,
+        reviewData
+      );
+
+    return res.data;
+  };
+
 export default {
   getBooks,
   getBookById,

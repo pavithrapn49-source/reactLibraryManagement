@@ -1,8 +1,15 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
 import Navbar from "./components/Navbar";
+
+import ManageUsers from "./pages/ManageUsers";
 
 import MemberDashboard from "./pages/MemberDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -15,77 +22,155 @@ import Books from "./pages/Books";
 import Dashboard from "./pages/Dashboard";
 
 import { useAuth } from "./context/AuthContext";
+
 import ProtectedRoute from "./components/ProtectedRoute";
+
 import Unauthorized from "./pages/Unauthorized";
 
-/* 🔔 TOAST */
+/* TOAST */
+
 import { ToastContainer } from "react-toastify";
+
 import "react-toastify/dist/ReactToastify.css";
 
-/* 🔥 WRAPPER */
-const AppContent = () => {
-  const location = useLocation();
-  const { user } = useAuth();
+/* ================= APP CONTENT ================= */
 
-  const hideNavbarPaths = ["/login", "/register", "/"];
+const AppContent = () => {
+
+  const location =
+    useLocation();
+
+  const { user } =
+    useAuth();
+
+  const hideNavbarPaths = [
+    "/login",
+    "/register",
+    "/",
+  ];
 
   return (
     <>
-      {/* ✅ Navbar */}
-      {!hideNavbarPaths.includes(location.pathname) && <Navbar />}
 
-      {/* ✅ Toast */}
-      <ToastContainer position="top-right" autoClose={2000} />
+      {/* NAVBAR */}
+
+      {!hideNavbarPaths.includes(
+        location.pathname
+      ) && <Navbar />}
+
+      {/* TOAST */}
+
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+      />
+
+      {/* ROUTES */}
 
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
 
-        {/* 🔐 Dashboard Layout (MAIN FIX) */}
+        {/* ================= PUBLIC ================= */}
+
+        <Route
+          path="/"
+          element={<Login />}
+        />
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+        {/* ================= DASHBOARD ================= */}
+
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
+
               <Dashboard />
+
             </ProtectedRoute>
           }
         >
-          {/* Default page based on role */}
+
+          {/* DEFAULT DASHBOARD */}
+
           <Route
             index
             element={
-              user?.role === "admin" ? (
+              user?.role ===
+              "admin" ? (
+
                 <AdminDashboard />
-              ) : user?.role === "librarian" ? (
+
+              ) : user?.role ===
+                "librarian" ? (
+
                 <LibrarianDashboard />
+
               ) : (
+
                 <MemberDashboard />
+
               )
             }
           />
 
-          {/* Member pages */}
-          <Route path="books" element={<Books />} />
-          <Route path="my-borrows" element={<MyBorrow />} />
-          <Route path="pay-fine" element={<PayFine />} />
+          {/* ================= BOOKS ================= */}
+
+          <Route
+            path="books"
+            element={<Books />}
+          />
+
+          {/* ================= BORROWS ================= */}
+
+          <Route
+            path="my-borrows"
+            element={<MyBorrow />}
+          />
+
+          {/* ================= PAY FINE ================= */}
+
+          <Route
+            path="pay-fine"
+            element={<PayFine />}
+          />
+
+          {/* ================= MANAGE USERS ================= */}
+
+          <Route
+            path="users"
+            element={<ManageUsers />}
+          />
+
         </Route>
 
-        {/* Unauthorized */}
-        <Route path="/unauthorized" element={<Unauthorized />} />
+        {/* ================= UNAUTHORIZED ================= */}
+
+        <Route
+          path="/unauthorized"
+          element={
+            <Unauthorized />
+          }
+        />
+
       </Routes>
     </>
   );
 };
 
-/* 🚀 MAIN APP */
+/* ================= MAIN APP ================= */
+
 function App() {
-  return (
-    <Router>
-      <AppContent />
-    </Router>
-  );
+
+  return <AppContent />;
 }
 
 export default App;

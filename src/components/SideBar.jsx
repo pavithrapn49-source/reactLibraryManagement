@@ -86,25 +86,24 @@ const Sidebar = () => {
             </>
           )}
 
-          {/* ADMIN */}
-          {user?.role === "admin" && (
-            <>
-              <Link
-                to="/admin"
-                className="block px-4 py-3 rounded-xl bg-white/10 hover:bg-blue-500/30 transition"
-              >
-                🛠 Dashboard
-              </Link>
+{/* ADMIN */}
+{user?.role === "admin" && (
+  <>
+    <Link
+      to="/dashboard"
+      className="sidebar-link"
+    >
+      🛠 Dashboard
+    </Link>
 
-              <Link
-                to="/users"
-                className="block px-4 py-3 rounded-xl bg-white/10 hover:bg-blue-500/30 transition"
-              >
-                👥 Manage Users
-              </Link>
-            </>
-          )}
-
+    <Link
+      to="/dashboard/users"
+      className="sidebar-link"
+    >
+      👥 Manage Users
+    </Link>
+  </>
+)}
           {/* LIBRARIAN */}
           {user?.role === "librarian" && (
             <>

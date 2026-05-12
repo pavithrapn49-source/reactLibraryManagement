@@ -418,3 +418,20 @@ h3{
 .recent-activity tr {
   background: transparent !important;
 }
+
+.sidebar-link{
+  display:block;
+  padding:14px 18px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.08);
+  transition:0.3s;
+  position:relative;
+  z-index:1000;
+  cursor:pointer;
+  text-decoration:none;
+  color:white;
+}
+
+.sidebar-link:hover{
+  background:rgba(59,130,246,0.35);
+}

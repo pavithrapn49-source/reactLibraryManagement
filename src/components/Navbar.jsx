@@ -1,10 +1,12 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import {useTheme,} from "../context/ThemeContext";
 import "../styles/Navbar.css";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const {darkMode,toggleTheme,} = useTheme();
 
   const handleLogout = async () => {
     await logout();
@@ -97,7 +99,12 @@ const Navbar = () => {
         <span className="user-role">
           👤 {userName} ({userRole})
         </span>
-
+<button
+  className="theme-btn"
+  onClick={toggleTheme}
+>
+  {darkMode ? "☀ Light" : "🌙 Dark"}
+</button>
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>

@@ -164,3 +164,32 @@
     font-size:22px;
   }
 }
+
+/* ================= THEME BUTTON ================= */
+
+.theme-btn {
+
+  padding: 10px 16px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    #6366f1,
+    #3b82f6
+  );
+
+  color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.3s ease;
+}
+
+.theme-btn:hover {
+  transform: scale(1.05);
+}
