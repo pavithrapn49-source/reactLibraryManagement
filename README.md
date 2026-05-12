@@ -2,6 +2,33 @@
 
 A React-based application for managing library resources, including books, users, and borrowing operations.
 
+
+
+# 🌐 Live Demo
+
+## Frontend
+
+https://react-library-management-gzi1.vercel.app
+
+## Backend API
+
+https://library-management-backend-0un8.onrender.com
+
+---
+
+# 🔑 Demo Credentials
+
+## 👑 Admin Login
+
+Email: admin@gmail.com  
+Password: admin123
+
+## 👤 Member Login
+
+Email: member@gmail.com  
+Password: member123
+
+
 ## Features
 
 - Add, edit, and delete books from the library
