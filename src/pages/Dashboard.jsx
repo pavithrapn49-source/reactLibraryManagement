@@ -5,7 +5,6 @@ import { useAuth } from "../context/AuthContext";
 const Dashboard = () => {
   const { user, authLoading } = useAuth();
 
-  // 🔄 Loading state
   if (authLoading) {
     return (
       <div className="flex items-center justify-center h-screen text-lg">
@@ -14,17 +13,14 @@ const Dashboard = () => {
     );
   }
 
-  // 🔐 Not logged in
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
+    <div key={user?._id} className="flex min-h-screen bg-gray-50">
       <SideBar />
 
-      {/* Main Content */}
       <div className="flex-1 p-6 overflow-y-auto">
         <Outlet />
       </div>
